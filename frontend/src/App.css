@@ -1,0 +1,16 @@
+.App {
+  text-align: center;
+}
+
+/* Custom styles */
+.analysis-card {
+  @apply p-6 bg-white rounded-lg shadow-sm border;
+}
+
+.metric-card {
+  @apply p-4 bg-gray-50 rounded-lg text-center;
+}
+
+.progress-bar {
+  @apply h-2 rounded-full transition-all duration-300;
+}
