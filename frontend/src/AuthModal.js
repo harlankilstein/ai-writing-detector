@@ -1,0 +1,160 @@
+```javascript
+import React, { useState } from 'react';
+import { X, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from './AuthContext';
+
+const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
+  const [mode, setMode] = useState(initialMode); // 'signup' or 'login'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const { signup, login } = useAuth();
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      if (mode === 'signup') {
+        await signup(email, password);
+      } else {
+        await login(email, password);
+      }
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = () => {
+    setMode(mode === 'signup' ? 'login' : 'signup');
+    setError('');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {mode === 'signup' ? 'Start Your Free Trial' : 'Welcome Back'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {mode === 'signup' && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start">
+                <CheckCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-blue-800 mb-1">3-Day Free Trial</h3>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Unlimited document analysis</li>
+                    <li>• Google Docs integration</li>
+                    <li>• Full access to all features</li>
+                    <li>• No credit card required</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder={mode === 'signup' ? 'Create a password (6+ characters)' : 'Enter your password'}
+                  minLength={6}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  {mode === 'signup' ? 'Creating Account...' : 'Signing In...'}
+                </div>
+              ) : (
+                mode === 'signup' ? 'Start Free Trial' : 'Sign In'
+              )}
+            </button>
+          </form>
+
+          {/* Switch Mode */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
+              <button
+                onClick={switchMode}
+                className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {mode === 'signup' ? 'Sign In' : 'Start Free Trial'}
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthModal;
+```
