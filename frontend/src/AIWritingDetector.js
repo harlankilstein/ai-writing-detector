@@ -536,4 +536,3 @@ const AIWritingDetector = () => {
 };
 
 export default AIWritingDetector;
-```
