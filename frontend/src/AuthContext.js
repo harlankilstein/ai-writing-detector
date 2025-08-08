@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
             headers: {
               'Authorization': `Bearer ${storedToken}`
             }
-          });
+           }); 
 
           if (response.ok) {
             const userData = await response.json();
