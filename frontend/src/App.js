@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css';
 import AIWritingDetector from './AIWritingDetector';
 
 function App() {
