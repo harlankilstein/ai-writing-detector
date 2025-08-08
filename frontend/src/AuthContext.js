@@ -1,4 +1,3 @@
-```javascript
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -28,7 +27,7 @@ export const AuthProvider = ({ children }) => {
             headers: {
               'Authorization': `Bearer ${storedToken}`
             }
-           }); 
+          });
 
           if (response.ok) {
             const userData = await response.json();
@@ -140,5 +139,3 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-```
-
