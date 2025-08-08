@@ -125,7 +125,7 @@ const AIWritingDetector = () => {
         body: JSON.stringify({
           doc_url: googleDocUrl.trim()
         })
-       });
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
