@@ -1,4 +1,3 @@
-```javascript
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -106,4 +105,3 @@ export const StripeProvider = ({ children }) => {
     </StripeContext.Provider>
   );
 };
-```
