@@ -1,4 +1,3 @@
-```javascript
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, CheckCircle, BarChart3, FileX, Globe, LogOut } from 'lucide-react';
 import { analyzeText } from './textAnalyzer';
@@ -517,4 +516,3 @@ const AIWritingDetector = () => {
 };
 
 export default AIWritingDetector;
-```
