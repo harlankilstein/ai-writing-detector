@@ -1,4 +1,7 @@
 {
+  "_comment": "Updated to disable ESLint",
+  "name": "frontend",
+{
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
