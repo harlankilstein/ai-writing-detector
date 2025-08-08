@@ -1,5 +1,4 @@
 import React from 'react';
-
 const AIWritingDetector = () => {
   return (
     <div>
@@ -8,5 +7,4 @@ const AIWritingDetector = () => {
     </div>
   );
 };
-
 export default AIWritingDetector;
