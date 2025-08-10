@@ -1,249 +1,145 @@
-```javascript
-// AI Writing Pattern Analysis Engine
-
-const patterns = {
-  structural: {
-    uniformParagraphLength: { weight: 0.15, description: "Paragraphs are suspiciously uniform in length" },
-    transitionOveruse: { weight: 0.20, description: "Excessive use of transition words between sentences" },
-    consistentSentenceLength: { weight: 0.10, description: "Sentences are too consistent in length" },
-    noRhetoricalQuestions: { weight: 0.05, description: "Complete absence of rhetorical questions" },
-    perfectGrammar: { weight: 0.10, description: "Unnaturally perfect grammar with no contractions" }
-  },
-  
-  content: {
-    genericExamples: { weight: 0.15, description: "Uses only generic, textbook-style examples" },
-    balancedViewpoints: { weight: 0.10, description: "Artificially balanced viewpoints on all topics" },
-    lackPersonalVoice: { weight: 0.15, description: "No personal anecdotes, opinions, or voice" },
-    platitudeOveruse: { weight: 0.10, description: "Overuse of platitudes and generic statements" }
-  },
-  
-  language: {
-    formalityInconsistency: { weight: 0.12, description: "Inappropriately formal tone for casual topics" },
-    buzzwordClustering: { weight: 0.18, description: "AI buzzwords appear in clusters" },
-    repetitiveStructure: { weight: 0.15, description: "Repetitive sentence and paragraph structures" },
-    lackIdioms: { weight: 0.08, description: "Complete absence of idioms or colloquialisms" }
-  }
-};
-
-const wordLists = {
-  highRisk: [
-    'delve', 'unpack', 'leverage', 'facilitate', 'optimize', 'streamline', 'harness',
-    'orchestrate', 'catalyze', 'synthesize', 'paradigm', 'tapestry', 'landscape',
-    'multifaceted', 'comprehensive', 'robust', 'nuanced', 'seamless', 'holistic',
-    'spearhead', 'champion', 'cultivate', 'galvanize', 'curate', 'distill'
-  ],
-  
-  mediumRisk: [
-    'utilize', 'implement', 'enhance', 'dynamic', 'innovative', 'strategic',
-    'diverse', 'significant', 'substantial', 'considerable', 'notable',
-    'remarkable', 'exceptional', 'outstanding', 'exemplary', 'stellar'
-  ],
-  
-  transitions: [
-    'furthermore', 'moreover', 'additionally', 'however', 'nevertheless', 
-    'consequently', 'therefore', 'thus', 'hence', 'accordingly', 'similarly',
-    'likewise', 'conversely', 'on the other hand', 'in contrast', 'alternatively'
-  ],
-  
-  phrases: [
-    'it is worth noting that', 'it is important to consider', 'in today fast-paced world',
-    'at the end of the day', 'this begs the question', 'the implications are far-reaching',
-    'striking a balance between', 'it goes without saying', 'since the dawn of time',
-    'without a doubt', 'in conclusion', 'to sum up', 'let us delve into',
-    'as we explore the nuances', 'what does this mean for the future',
-    'we must ask ourselves', 'the answer may surprise you'
-  ],
-  
-  platitudes: [
-    'technology is changing', 'education plays a vital role', 'communication is key',
-    'every coin has two sides', 'social media has its pros and cons', 'health is important',
-    'we all strive for happiness', 'success means different things'
-  ]
-};
-
-const personalIndicators = [
-  'i think', 'i believe', 'in my opinion', 'personally', 'i feel', 'my experience',
-  'i have found', 'i remember', 'i noticed', 'from my perspective', 'i would argue',
-  'i disagree', 'i agree', 'honestly', 'frankly', 'to be honest'
-];
-
-const calculateVariance = (numbers) => {
-  if (numbers.length === 0) return 0;
-  const mean = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
-  const squaredDiffs = numbers.map(num => Math.pow(num - mean, 2));
-  return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / numbers.length;
-};
-
-const countWords = (text, wordList) => {
-  const textLower = text.toLowerCase();
-  let count = 0;
-  
-  wordList.forEach(word => {
-    const escapedWord = word.replace(/'/g, "'");
-    const regex = new RegExp(`\\b${escapedWord}\\b`, 'g');
-    const matches = textLower.match(regex);
-    if (matches) count += matches.length;
-  });
-  
-  return count;
-};
-
-const countPhrases = (text, phraseList) => {
-  const textLower = text.toLowerCase();
-  let count = 0;
-  const foundPhrases = [];
-  
-  phraseList.forEach(phrase => {
-    if (textLower.includes(phrase)) {
-      count++;
-      foundPhrases.push(phrase);
-    }
-  });
-  
-  return { count, foundPhrases };
-};
+// AI Writing Pattern Detection Engine
+// Analyzes text for patterns commonly found in AI-generated content
 
 export const analyzeText = (text) => {
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  if (!text || typeof text !== 'string') {
+    return { score: 0, details: [], metrics: {} };
+  }
+
+  const words = text.toLowerCase().split(/\s+/).filter(word => word.length > 0);
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
   const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-  const words = text.toLowerCase().match(/\b\w+\b/g) || [];
-  
-  if (words.length < 50) {
-    return {
-      score: 0,
-      details: ['Text too short for reliable analysis (minimum 50 words required)'],
-      metrics: { words: words.length, sentences: sentences.length, paragraphs: paragraphs.length }
-    };
-  }
 
-  let scores = {};
-  let details = [];
-  let totalScore = 0;
+  let score = 0;
+  const details = [];
+  const metrics = {
+    words: words.length,
+    sentences: sentences.length,
+    paragraphs: paragraphs.length,
+    avgSentenceLength: Math.round(words.length / sentences.length) || 0,
+    avgParagraphLength: Math.round(sentences.length / paragraphs.length) || 0
+  };
 
-  // Paragraph length analysis
-  if (paragraphs.length > 2) {
-    const paragraphSentenceCounts = paragraphs.map(p => 
-      p.split(/[.!?]+/).filter(s => s.trim().length > 10).length
-    );
-    const paragraphVariance = calculateVariance(paragraphSentenceCounts);
-    const avgParagraphLength = paragraphSentenceCounts.reduce((sum, count) => sum + count, 0) / paragraphSentenceCounts.length;
-    
-    if (paragraphVariance < 1.5 && avgParagraphLength > 2 && paragraphs.length > 3) {
-      scores.uniformParagraphLength = 0.8;
-      details.push(`Suspiciously uniform paragraph lengths (variance: ${paragraphVariance.toFixed(2)})`);
-    }
-  }
+  // AI-common transition words and phrases
+  const aiTransitions = [
+    'furthermore', 'moreover', 'additionally', 'consequently', 'nevertheless',
+    'nonetheless', 'therefore', 'thus', 'hence', 'accordingly', 'subsequently',
+    'in conclusion', 'to summarize', 'in summary', 'ultimately', 'essentially'
+  ];
 
-  // Sentence length consistency
-  if (sentences.length > 5) {
-    const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length);
-    const sentenceVariance = calculateVariance(sentenceLengths);
-    const avgSentenceLength = sentenceLengths.reduce((sum, len) => sum + len, 0) / sentenceLengths.length;
-    
-    if (sentenceVariance < 20 && avgSentenceLength > 8) {
-      scores.consistentSentenceLength = 0.7;
-      details.push(`Sentences too consistent in length (variance: ${sentenceVariance.toFixed(1)})`);
-    }
-  }
+  // AI-common buzzwords
+  const aiBuzzwords = [
+    'leverage', 'optimize', 'streamline', 'enhance', 'facilitate', 'utilize',
+    'comprehensive', 'robust', 'innovative', 'cutting-edge', 'state-of-the-art',
+    'paradigm', 'synergy', 'holistic', 'scalable', 'seamless'
+  ];
 
-  // Transition word analysis
-  const transitionCount = countWords(text, wordLists.transitions);
-  const transitionDensity = transitionCount / sentences.length;
-  
-  if (transitionDensity > 0.3) {
-    scores.transitionOveruse = Math.min(transitionDensity * 2, 1);
-    details.push(`High transition word density: ${(transitionDensity * 100).toFixed(1)}% of sentences`);
-  }
+  // Formal/academic phrases common in AI writing
+  const formalPhrases = [
+    'it is important to note', 'it should be mentioned', 'it is worth noting',
+    'one must consider', 'it is essential to', 'it is crucial to understand',
+    'in order to', 'with regard to', 'in terms of', 'by means of'
+  ];
 
-  // Rhetorical questions
-  const questionCount = sentences.filter(s => s.trim().includes('?')).length;
-  if (questionCount === 0 && sentences.length > 10) {
-    scores.noRhetoricalQuestions = 0.6;
-    details.push("No rhetorical questions found in substantial text");
-  }
-
-  // Contraction analysis
-  const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
-  if (contractionCount === 0 && words.length > 200) {
-    scores.perfectGrammar = 0.7;
-    details.push("No contractions found - unnaturally formal");
-  }
-
-  // Personal voice analysis
-  const personalCount = countWords(text, personalIndicators);
-  const personalDensity = personalCount / words.length;
-  
-  if (personalDensity === 0 && words.length > 200) {
-    scores.lackPersonalVoice = 0.8;
-    details.push("No personal voice indicators detected");
-  }
-
-  // Platitude detection
-  const platitudeResult = countPhrases(text, wordLists.platitudes);
-  if (platitudeResult.count > 0) {
-    scores.platitudeOveruse = Math.min(platitudeResult.count * 0.3, 1);
-    details.push(`Found ${platitudeResult.count} platitude(s): ${platitudeResult.foundPhrases.slice(0, 2).join(', ')}`);
-  }
-
-  // Buzzword clustering analysis
-  let buzzwordScore = 0;
-  
-  const highRiskCount = countWords(text, wordLists.highRisk);
-  buzzwordScore += highRiskCount * 0.3;
-  
-  const mediumRiskCount = countWords(text, wordLists.mediumRisk);
-  buzzwordScore += mediumRiskCount * 0.15;
-  
-  const phraseResult = countPhrases(text, wordLists.phrases);
-  buzzwordScore += phraseResult.count * 0.4;
-  
-  if (buzzwordScore > 1) {
-    const buzzwordDensity = buzzwordScore / words.length * 1000;
-    scores.buzzwordClustering = Math.min(buzzwordDensity / 10, 1);
-    details.push(`Buzzword clustering detected (density: ${buzzwordDensity.toFixed(2)})`);
-    
-    if (phraseResult.foundPhrases.length > 0) {
-      details.push(`AI phrases found: ${phraseResult.foundPhrases.slice(0, 3).join(', ')}`);
-    }
-  }
-
-  // Calculate weighted total score
-  Object.keys(scores).forEach(key => {
-    let patternWeight = 0.1;
-    
-    Object.values(patterns).forEach(patternGroup => {
-      if (patternGroup[key]) {
-        patternWeight = patternGroup[key].weight;
-      }
-    });
-    
-    totalScore += scores[key] * patternWeight;
+  // Check for excessive transition word usage
+  let transitionCount = 0;
+  aiTransitions.forEach(transition => {
+    const regex = new RegExp(`\\b${transition}\\b`, 'gi');
+    const matches = text.match(regex);
+    if (matches) transitionCount += matches.length;
   });
 
-  totalScore = Math.min(totalScore, 1.0);
+  const transitionDensity = (transitionCount / words.length) * 100;
+  metrics.transitionDensity = Math.round(transitionDensity * 10) / 10;
 
-  const avgParagraphLength = paragraphs.length > 0 ? 
-    (sentences.length / paragraphs.length).toFixed(1) : '0';
-  const avgSentenceLength = sentences.length > 0 ? 
-    (words.length / sentences.length).toFixed(1) : '0';
-  const buzzwordDensity = words.length > 0 ? 
-    ((highRiskCount + mediumRiskCount) / words.length * 1000).toFixed(2) : '0';
+  if (transitionDensity > 2) {
+    score += 0.15;
+    details.push(`High density of transition words (${transitionDensity.toFixed(1)}%) suggests formulaic structure`);
+  }
+
+  // Check for buzzword density
+  let buzzwordCount = 0;
+  aiBuzzwords.forEach(buzzword => {
+    const regex = new RegExp(`\\b${buzzword}\\b`, 'gi');
+    const matches = text.match(regex);
+    if (matches) buzzwordCount += matches.length;
+  });
+
+  const buzzwordDensity = (buzzwordCount / words.length) * 100;
+  metrics.buzzwordDensity = Math.round(buzzwordDensity * 10) / 10;
+
+  if (buzzwordDensity > 1.5) {
+    score += 0.12;
+    details.push(`High concentration of business buzzwords suggests AI generation`);
+  }
+
+  // Check for formal phrase patterns
+  let formalCount = 0;
+  formalPhrases.forEach(phrase => {
+    const regex = new RegExp(phrase.replace(/\s+/g, '\\s+'), 'gi');
+    if (regex.test(text)) formalCount++;
+  });
+
+  if (formalCount > 2) {
+    score += 0.1;
+    details.push(`Multiple formal academic phrases indicate AI writing patterns`);
+  }
+
+  // Check paragraph uniformity (AI tends to write uniform paragraphs)
+  if (paragraphs.length > 2) {
+    const paragraphLengths = paragraphs.map(p => p.split(/[.!?]+/).length);
+    const avgLength = paragraphLengths.reduce((a, b) => a + b, 0) / paragraphLengths.length;
+    const variance = paragraphLengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / paragraphLengths.length;
+    
+    if (variance < 2 && avgLength > 3) {
+      score += 0.08;
+      details.push('Unusually uniform paragraph structure throughout document');
+    }
+  }
+
+  // Check for personal voice indicators
+  const personalIndicators = ['i think', 'i believe', 'in my opinion', 'personally', 'i feel', 'my experience'];
+  const hasPersonalVoice = personalIndicators.some(indicator => 
+    text.toLowerCase().includes(indicator)
+  );
+  metrics.personalVoice = hasPersonalVoice;
+
+  if (!hasPersonalVoice && words.length > 100) {
+    score += 0.05;
+    details.push('Lack of personal voice or subjective language');
+  }
+
+  // Check for contractions (AI often avoids them)
+  const contractions = text.match(/\b\w+[''](?:t|re|ve|ll|d|s)\b/g) || [];
+  metrics.contractions = contractions.length;
+
+  if (contractions.length === 0 && words.length > 100) {
+    score += 0.05;
+    details.push('Complete absence of contractions suggests formal AI writing');
+  }
+
+  // Check sentence length variance
+  const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length);
+  if (sentenceLengths.length > 0) {
+    const avgSentenceLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
+    const sentenceVariance = sentenceLengths.reduce((sum, len) => sum + Math.pow(len - avgSentenceLength, 2), 0) / sentenceLengths.length;
+    
+    if (sentenceVariance < 10 && avgSentenceLength > 15) {
+      score += 0.1;
+      details.push('Consistently similar sentence lengths indicate AI generation');
+    }
+  }
+
+  // Check for rhetorical questions
+  const questions = text.match(/\?/g) || [];
+  metrics.questions = questions.length;
+
+  // Normalize score to 0-1 range
+  score = Math.min(score, 1);
 
   return {
-    score: totalScore,
-    details: details.length > 0 ? details : [],
-    metrics: {
-      words: words.length,
-      sentences: sentences.length,
-      paragraphs: paragraphs.length,
-      avgParagraphLength,
-      avgSentenceLength,
-      transitionDensity: (transitionDensity * 100).toFixed(1),
-      personalVoice: personalCount > 0,
-      contractions: contractionCount,
-      buzzwordDensity,
-      questions: questionCount
-    }
+    score: Math.round(score * 100) / 100,
+    details,
+    metrics
   };
 };
-```
