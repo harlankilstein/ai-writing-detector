@@ -16,7 +16,7 @@ const AIWritingDetector = () => {
   const [error, setError] = useState(null);
   const [analysisSource, setAnalysisSource] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState(null);
+  const [authMode, setAuthMode] = useState('signup');
 
   const { user, token, logout, isAuthenticated, loading: authLoading, isTrialExpired } = useAuth();
 
