@@ -1,32 +1,35 @@
-// Advanced AI Writing Pattern Analysis Engine - Aggressive Mode for Flagrant Content
+// Advanced AI Writing Pattern Analysis Engine
+// Shows all possibilities with appropriate confidence levels
 
 const patterns = {
   structural: {
-    uniformParagraphLength: { weight: 0.15, description: "Paragraphs are suspiciously uniform in length" },
-    transitionOveruse: { weight: 0.22, description: "Excessive use of transition words between sentences" },
-    consistentSentenceLength: { weight: 0.12, description: "Sentences are too consistent in length" },
-    repetitiveSentenceStarters: { weight: 0.18, description: "Repetitive sentence opening patterns" },
-    uniformListStructure: { weight: 0.12, description: "Lists consistently have same number of items" },
-    noRhetoricalQuestions: { weight: 0.08, description: "Complete absence of rhetorical questions" },
-    perfectGrammar: { weight: 0.10, description: "Unnaturally perfect grammar with no contractions" }
+    uniformParagraphLength: { weight: 0.12, description: "Paragraphs are suspiciously uniform in length" },
+    transitionOveruse: { weight: 0.18, description: "Excessive use of transition words between sentences" },
+    consistentSentenceLength: { weight: 0.08, description: "Sentences are too consistent in length" },
+    repetitiveSentenceStarters: { weight: 0.15, description: "Repetitive sentence opening patterns" },
+    uniformListStructure: { weight: 0.10, description: "Lists consistently have same number of items" },
+    noRhetoricalQuestions: { weight: 0.06, description: "Complete absence of rhetorical questions" },
+    perfectGrammar: { weight: 0.08, description: "Unnaturally perfect grammar with no contractions" },
+    predictableFlow: { weight: 0.14, description: "Predictable information architecture" }
   },
   
   content: {
-    technicalClustering: { weight: 0.25, description: "High concentration of technical jargon" },
-    buzzwordClustering: { weight: 0.22, description: "AI buzzwords appear in clusters" },
-    genericExamples: { weight: 0.12, description: "Uses only generic, textbook-style examples" },
-    balancedViewpoints: { weight: 0.15, description: "Artificially balanced viewpoints on all topics" },
-    lackPersonalVoice: { weight: 0.18, description: "No personal anecdotes, opinions, or voice" },
-    platitudeOveruse: { weight: 0.10, description: "Overuse of platitudes and generic statements" },
-    pseudoInsightOveruse: { weight: 0.16, description: "Overuse of pseudo-insightful phrases" }
+    technicalClustering: { weight: 0.22, description: "High concentration of technical jargon" },
+    buzzwordClustering: { weight: 0.18, description: "AI buzzwords appear in clusters" },
+    overExplaining: { weight: 0.16, description: "Unnecessary over-explanation and context" },
+    artificialNeutrality: { weight: 0.14, description: "Artificially balanced viewpoints on all topics" },
+    lackPersonalVoice: { weight: 0.15, description: "No personal anecdotes, opinions, or voice" },
+    platitudeOveruse: { weight: 0.08, description: "Overuse of platitudes and generic statements" },
+    pseudoInsightOveruse: { weight: 0.12, description: "Overuse of pseudo-insightful phrases" }
   },
   
   language: {
-    formalityInconsistency: { weight: 0.12, description: "Inappropriately formal tone for casual topics" },
-    repetitiveStructure: { weight: 0.15, description: "Repetitive sentence and paragraph structures" },
-    lackIdioms: { weight: 0.10, description: "Complete absence of idioms or colloquialisms" },
-    hedgingLanguage: { weight: 0.12, description: "Excessive use of hedging/qualifying language" },
-    palpableOveruse: { weight: 0.14, description: "Overuse of overly descriptive 'palpable' type words" }
+    modernHedging: { weight: 0.13, description: "Excessive modern hedging language patterns" },
+    formalityInconsistency: { weight: 0.10, description: "Inappropriately formal tone for context" },
+    repetitiveStructure: { weight: 0.12, description: "Repetitive sentence and paragraph structures" },
+    lackIdioms: { weight: 0.08, description: "Complete absence of idioms or colloquialisms" },
+    palpableOveruse: { weight: 0.11, description: "Overuse of overly descriptive words" },
+    comprehensiveLanguage: { weight: 0.12, description: "Overly comprehensive and helpful tone" }
   }
 };
 
@@ -47,7 +50,7 @@ const wordLists = {
     'touchpoint', 'silhouette', 'backdrop', 'vanguard', 'ecosystem', 'architecture'
   ],
   
-  // 2025 AI/ML Technical Terms (Missing from current algorithm)
+  // 2025 AI/ML Technical Terms
   aiTechnicalTerms: [
     'transformer-based', 'reinforcement learning', 'RLHF', 'embeddings alignment', 
     'retrieval-augmented generation', 'RAG', 'epistemic grounding', 'meta-loss functions',
@@ -64,96 +67,45 @@ const wordLists = {
     'knowledge distillation', 'sparse attention mechanisms', 'digital twin environments',
     'autonomous cognitive ecosystems', 'artificial general intelligence', 'AGI',
     'post-transformer epoch', 'perplexity metrics', 'epistemic', 'probabilistic consistency',
-    'stateful sessions', 'edge deployment', 'federated learning paradigms',
-    'sub-millisecond', 'hyper-personalized', 'context-aware', 'trillions of parameters',
-    'fine-tuned via', 'domain-specific data curation', 'zero-shot and few-shot',
-    'supervised learning constraints', 'synergistic interplay', 'heterogeneous data streams',
-    'distributed vector databases', 'real-time contextual augmentation', 'mitigating hallucination',
-    'epistemic grounding fidelity', 'autonomous agent frameworks', 'message-passing protocols',
-    'policy-based decision trees', 'emergent behaviors facilitated', 'adaptive planning heuristics',
-    'probabilistic consistency across', 'resource-constrained devices', 'perplexity metrics',
-    'democratization of inference', 'privacy-preserving gradient aggregation',
-    'decentralized model refinement', 'differential privacy noise injection',
-    'AI governance frameworks', 'regulatory mandates', 'observability and explainability',
-    'SHAP value analysis', 'attention map visualization', 'model-agnostic interpretability',
-    'bias amplification', 'fairness metrics', 'demographic cohorts', 'drift detection',
-    'automated retraining workflows', 'divergence thresholds'
+    'stateful sessions', 'edge deployment', 'federated learning paradigms'
   ],
   
-  // From your CSV - Common Adjectives
+  // From your CSV - Common Adjectives (AI favorites)
   commonAdjectives: [
     'nuanced', 'intricate', 'complex', 'multifaceted', 'dynamic', 'diverse', 'holistic',
     'comprehensive', 'robust', 'strategic', 'transformative', 'insightful', 'innovative',
     'revolutionary', 'groundbreaking', 'pivotal', 'critical', 'essential', 'fundamental',
-    'significant', 'notable', 'compelling', 'seamless', 'sophisticated', 'cutting-edge',
-    'state-of-the-art', 'next-generation', 'scalable', 'adaptive', 'intelligent',
-    'high-fidelity', 'domain-specific', 'context-aware', 'privacy-preserving',
-    'model-agnostic', 'gradient-based', 'sub-symbolic', 'multi-objective'
+    'significant', 'notable', 'compelling', 'seamless', 'sophisticated', 'cutting-edge'
   ],
   
-  // From your CSV - Common Adverbs
-  commonAdverbs: [
-    'literally', 'basically', 'truly', 'actually', 'essentially', 'simply', 'clearly',
-    'obviously', 'undoubtedly', 'notably', 'importantly', 'significantly', 'remarkably',
-    'especially', 'increasingly', 'largely', 'relatively', 'inherently', 'ideally',
-    'accordingly', 'systematically', 'methodically', 'substantially', 'fundamentally',
-    'seamlessly', 'dynamically', 'proactively', 'autonomously', 'efficiently'
+  // Modern AI Hedging (2025 patterns)
+  modernHedging: [
+    "it's worth noting that", "it's important to consider", "it's crucial to understand",
+    "one might argue", "it could be argued", "it's essential to recognize",
+    "it's interesting to note", "worth mentioning", "it's valuable to explore",
+    "particularly noteworthy", "especially relevant", "notably significant"
   ],
   
-  // From your CSV - Palpable-Type Words
-  palpableWords: [
-    'palpable', 'tangible', 'visceral', 'profound', 'profound sense of', 'a veil of',
-    'the fabric of', 'the depths of', 'the weight of', 'a dance between', 'echoes of',
-    'suspended in time', 'etched into memory', 'soul-stirring', 'haunting', 'ethereal',
-    'spine-tingling', 'bone-chilling', 'earth-shattering', 'mind-numbing', 'breathtaking'
+  // Over-explanation patterns (ChatGPT/Claude style)
+  overExplanationPhrases: [
+    "let me break this down", "to put this in perspective", "here's what this means",
+    "to elaborate further", "in other words", "to clarify", "more specifically",
+    "essentially what this means", "the key thing to understand", "put simply"
   ],
   
-  // From your CSV - Predictable Openers & Closers  
+  // Predictable openers that AI loves
   predictableOpeners: [
-    "in today's fast-paced world", "since the dawn of time", "it goes without saying",
-    "let's delve into the intricacies", "as we explore the nuances", "it's important to understand",
-    "without a doubt", "in conclusion", "to sum up", "this article will explore", "in essence",
-    "at the end of the day", "a deeper understanding of", "in the current epoch",
-    "the proliferation of", "ushering in an era", "underpinned by", "at the core of",
-    "concurrently", "emerging as", "on the horizon", "finally", "as we advance",
-    "in the current epoch of", "catalyzed a tectonic shift", "ushering in an era where",
-    "this emergent ecosystem", "at the core of this transformation", "concurrently,",
-    "from a deployment standpoint", "emerging research in", "in parallel,", 
-    "on the horizon,", "finally, the convergence of", "as we advance into this"
+    "in today's fast-paced world", "in the current landscape", "as we navigate",
+    "in an era where", "given the complexity of", "when we consider",
+    "as we explore", "in the context of", "it's clear that", "there's no doubt that"
   ],
   
-  // From your CSV - Pseudo-Insight Phrases
-  pseudoInsightPhrases: [
-    "this begs the question", "it's not just about", "the implications are far-reaching",
-    "this opens up new possibilities", "what does this mean for the future",
-    "we must ask ourselves", "let's take a moment to consider", "the answer may surprise you",
-    "in many ways, this reflects a larger trend", "striking a balance between",
-    "signals a paradigm shift toward", "represents the frontier of", "will define the competitive landscape",
-    "best positioned to harness", "exponential potential of"
-  ],
-  
-  // From your CSV - Platitude Statements
-  platitudes: [
-    "technology is changing the way we live and work", "education plays a vital role in society",
-    "social media has its pros and cons", "health is one of the most important aspects of life",
-    "we all strive for happiness and success", "communication is the key to any successful relationship",
-    "every coin has two sides"
-  ],
-  
-  // Standard transition words
+  // AI's favorite transitions
   transitions: [
     'furthermore', 'moreover', 'additionally', 'however', 'nevertheless', 
     'consequently', 'therefore', 'thus', 'hence', 'accordingly', 'similarly',
     'likewise', 'conversely', 'on the other hand', 'in contrast', 'alternatively',
     'meanwhile', 'subsequently', 'concurrently', 'simultaneously'
-  ],
-  
-  // Hedging language
-  hedgingLanguage: [
-    'arguably', 'presumably', 'potentially', 'possibly', 'likely', 'tend to',
-    'appears to', 'seems to', 'suggests that', 'indicates that', 'may be',
-    'might be', 'could be', 'would suggest', 'it is possible that',
-    'one might argue', 'it could be argued', 'to some extent'
   ]
 };
 
@@ -161,8 +113,36 @@ const personalIndicators = [
   'i think', 'i believe', 'in my opinion', 'personally', 'i feel', 'my experience',
   'i have found', 'i remember', 'i noticed', 'from my perspective', 'i would argue',
   'i disagree', 'i agree', 'honestly', 'frankly', 'to be honest', 'my take is',
-  'i\'ve seen', 'i\'ve learned', 'in my view'
+  'i\'ve seen', 'i\'ve learned', 'in my view', 'i hate', 'i love', 'i\'m not sure'
 ];
+
+// Context-aware thresholds
+const contextualThresholds = {
+  academic: {
+    technicalJargon: 0.15,
+    formalTone: 0.20,
+    complexSentences: 0.18,
+    buzzwords: 0.12
+  },
+  business: {
+    technicalJargon: 0.10,
+    formalTone: 0.15,
+    complexSentences: 0.12,
+    buzzwords: 0.08
+  },
+  creative: {
+    technicalJargon: 0.05,
+    formalTone: 0.08,
+    complexSentences: 0.10,
+    buzzwords: 0.04
+  },
+  casual: {
+    technicalJargon: 0.03,
+    formalTone: 0.05,
+    complexSentences: 0.08,
+    buzzwords: 0.03
+  }
+};
 
 const calculateVariance = (numbers) => {
   if (numbers.length === 0) return 0;
@@ -204,133 +184,189 @@ const countPhrases = (text, phraseList) => {
   return { count, foundPhrases };
 };
 
-const analyzeSentenceStarters = (sentences) => {
-  if (sentences.length < 5) return { repetitive: false, details: [] };
+// Detect content context to adjust thresholds
+const detectContentContext = (text, words) => {
+  const academicIndicators = ['research', 'study', 'analysis', 'methodology', 'findings', 'conclusion'];
+  const businessIndicators = ['strategy', 'growth', 'market', 'revenue', 'stakeholder', 'ROI'];
+  const creativeIndicators = ['story', 'character', 'scene', 'narrative', 'plot', 'imagination'];
   
-  const starters = sentences.map(sentence => {
-    const trimmed = sentence.trim();
-    const words = trimmed.split(/\s+/);
-    return words.slice(0, 3).join(' ').toLowerCase();
-  });
+  const academicCount = academicIndicators.filter(word => text.toLowerCase().includes(word)).length;
+  const businessCount = businessIndicators.filter(word => text.toLowerCase().includes(word)).length;
+  const creativeCount = creativeIndicators.filter(word => text.toLowerCase().includes(word)).length;
   
-  const starterCounts = {};
-  starters.forEach(starter => {
-    starterCounts[starter] = (starterCounts[starter] || 0) + 1;
-  });
-  
-  const repeatedStarters = Object.entries(starterCounts).filter(([_, count]) => count > 2);
-  const repetitiveScore = repeatedStarters.length / sentences.length;
-  
-  return {
-    repetitive: repetitiveScore > 0.15, // Lowered threshold
-    score: Math.min(repetitiveScore * 3, 1), // More aggressive scoring
-    details: repeatedStarters.map(([starter, count]) => `"${starter}..." (${count} times)`)
-  };
+  if (academicCount >= 2) return 'academic';
+  if (businessCount >= 2) return 'business';
+  if (creativeCount >= 2) return 'creative';
+  return 'casual';
 };
 
-const analyzeListStructure = (text) => {
-  const listPattern = /(?:^\s*[-•*]\s+.+$)|(?:^\s*\d+\.\s+.+$)/gm;
-  const lists = [];
-  const lines = text.split('\n');
-  let currentList = [];
+// Semantic clustering - group related AI indicators
+const analyzeSemanticClusters = (text, sentences) => {
+  const clusters = [];
+  let currentCluster = [];
   
-  lines.forEach(line => {
-    if (listPattern.test(line)) {
-      currentList.push(line.trim());
-    } else if (currentList.length > 0) {
-      lists.push(currentList);
-      currentList = [];
+  sentences.forEach((sentence, index) => {
+    const indicators = {
+      aiWords: countWords(sentence, [...wordLists.buzzwordVerbs, ...wordLists.abstractNouns]).count,
+      techTerms: countWords(sentence, wordLists.aiTechnicalTerms).count,
+      hedging: countPhrases(sentence, wordLists.modernHedging).count,
+      transitions: countWords(sentence, wordLists.transitions).count
+    };
+    
+    const totalIndicators = Object.values(indicators).reduce((sum, count) => sum + count, 0);
+    
+    if (totalIndicators >= 1) { // Any indicator starts a potential cluster
+      currentCluster.push({ 
+        sentence: index, 
+        indicators: totalIndicators,
+        types: Object.keys(indicators).filter(key => indicators[key] > 0)
+      });
+    } else if (currentCluster.length > 0) {
+      if (currentCluster.length >= 1) clusters.push([...currentCluster]); // Even single instances are clusters
+      currentCluster = [];
     }
   });
   
-  if (currentList.length > 0) {
-    lists.push(currentList);
+  if (currentCluster.length > 0) {
+    clusters.push(currentCluster);
   }
   
-  if (lists.length < 2) return { uniform: false, score: 0 };
+  return clusters;
+};
+
+// Modern AI pattern detection
+const analyzeModernAIPatterns = (text, sentences, words) => {
+  const patterns = {};
   
-  const listLengths = lists.map(list => list.length);
-  const avgLength = listLengths.reduce((sum, len) => sum + len, 0) / listLengths.length;
-  const variance = calculateVariance(listLengths);
+  // Over-explanation detection
+  const explanationPhrases = countPhrases(text, wordLists.overExplanationPhrases);
+  if (explanationPhrases.count > 0) {
+    patterns.overExplaining = {
+      score: Math.min(explanationPhrases.count * 0.3, 0.8),
+      evidence: explanationPhrases.foundPhrases.slice(0, 2)
+    };
+  }
   
-  // Check for exactly 3-item lists (very common in AI writing)
-  const threeItemLists = listLengths.filter(len => len === 3).length;
-  const threeItemRatio = threeItemLists / lists.length;
+  // Artificial neutrality (lack of strong opinions)
+  const strongOpinions = ['definitely', 'absolutely', 'never', 'always', 'terrible', 'amazing', 'love', 'hate'];
+  const opinionCount = countWords(text, strongOpinions).count;
+  const neutralityRatio = sentences.length / Math.max(opinionCount, 1);
   
-  return {
-    uniform: variance < 0.8 || threeItemRatio > 0.5, // More sensitive
-    score: threeItemRatio > 0.5 ? 0.9 : Math.max(0, 1.2 - variance), // More aggressive
-    details: [`${lists.length} lists found`, `${threeItemLists} with exactly 3 items`]
+  if (neutralityRatio > 10 && sentences.length > 5) {
+    patterns.artificialNeutrality = {
+      score: Math.min(neutralityRatio / 20, 0.7),
+      evidence: `Only ${opinionCount} strong opinions in ${sentences.length} sentences`
+    };
+  }
+  
+  // Comprehensive language (AI being overly helpful)
+  const comprehensiveWords = ['comprehensive', 'thorough', 'detailed', 'complete', 'extensive', 'in-depth'];
+  const comprehensiveCount = countWords(text, comprehensiveWords);
+  if (comprehensiveCount.count > 0) {
+    patterns.comprehensiveLanguage = {
+      score: Math.min(comprehensiveCount.count * 0.25, 0.6),
+      evidence: comprehensiveCount.foundWords.slice(0, 3)
+    };
+  }
+  
+  return patterns;
+};
+
+// Calculate confidence level based on pattern convergence
+const calculateConfidenceLevel = (scores, clusters, words, context) => {
+  const activePatterns = Object.keys(scores).length;
+  const strongPatterns = Object.values(scores).filter(score => score > 0.5).length;
+  const clusterCount = clusters.length;
+  const totalClusterSize = clusters.reduce((sum, cluster) => sum + cluster.length, 0);
+  
+  // Adjust for context
+  const contextMultiplier = context === 'academic' ? 0.8 : context === 'casual' ? 1.2 : 1.0;
+  
+  let confidence = 'Minimal';
+  let certainty = 'Some isolated indicators detected';
+  let reasoning = [];
+  
+  if (activePatterns === 1 && strongPatterns === 0) {
+    confidence = 'Low';
+    certainty = 'Single AI pattern detected - could be coincidental';
+    reasoning.push('Only one type of AI indicator found');
+  } else if (activePatterns >= 2 && strongPatterns >= 1) {
+    confidence = 'Medium';
+    certainty = 'Multiple AI patterns detected - likely AI assistance';
+    reasoning.push(`${activePatterns} different pattern types detected`);
+  } else if (activePatterns >= 4 && strongPatterns >= 2) {
+    confidence = 'High';
+    certainty = 'Strong AI patterns detected - very likely AI-generated';
+    reasoning.push(`${activePatterns} patterns with ${strongPatterns} strong indicators`);
+  } else if (activePatterns >= 6 && strongPatterns >= 3) {
+    confidence = 'Very High';
+    certainty = 'Extensive AI patterns detected - almost certainly AI-generated';
+    reasoning.push(`${activePatterns} patterns with ${strongPatterns} strong indicators`);
+  }
+  
+  if (clusterCount > 0) {
+    reasoning.push(`${clusterCount} clusters of AI indicators found`);
+  }
+  
+  if (totalClusterSize > 5) {
+    reasoning.push('High concentration of AI patterns');
+  }
+  
+  return { 
+    level: confidence, 
+    certainty, 
+    reasoning,
+    contextAdjustment: contextMultiplier !== 1.0 ? `Adjusted for ${context} context` : null
   };
 };
 
-const analyzeTechnicalClustering = (text, words) => {
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
-  const technicalTerms = [...wordLists.aiTechnicalTerms, ...wordLists.buzzwordVerbs, ...wordLists.abstractNouns];
+// Generate actionable insights for users
+const generateActionableInsights = (analysis, context) => {
+  const insights = {
+    primaryConcerns: [],
+    suggestions: [],
+    contextNote: null
+  };
   
-  let clusterScore = 0;
-  let totalClusters = 0;
-  let foundTerms = [];
-  let highDensityCount = 0;
+  // Identify primary concerns
+  const sortedScores = Object.entries(analysis.scores)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 3);
   
-  sentences.forEach(sentence => {
-    const sentenceTerms = technicalTerms.filter(term => 
-      sentence.toLowerCase().includes(term.toLowerCase())
-    );
-    
-    if (sentenceTerms.length > 1) { // Lowered from 2 to 1
-      clusterScore += sentenceTerms.length * 0.4; // Increased multiplier
-      totalClusters++;
-      foundTerms.push(...sentenceTerms);
-    }
-    
-    if (sentenceTerms.length > 3) { // Very high density
-      highDensityCount++;
+  sortedScores.forEach(([pattern, score]) => {
+    if (score > 0.3) {
+      const patternInfo = Object.values(patterns).find(group => group[pattern]);
+      if (patternInfo) {
+        insights.primaryConcerns.push(patternInfo[pattern].description);
+      }
     }
   });
   
-  const density = clusterScore / sentences.length;
-  const uniqueTerms = [...new Set(foundTerms)];
-  const overallDensity = uniqueTerms.length / words.length;
-  
-  // Bonus for extremely high technical density
-  let bonusMultiplier = 1;
-  if (overallDensity > 0.05) bonusMultiplier = 1.5; // 5%+ of words are technical terms
-  if (highDensityCount > sentences.length * 0.3) bonusMultiplier = 1.8; // 30%+ sentences have 3+ tech terms
-  
-  return {
-    clustered: density > 0.05, // Lowered threshold
-    score: Math.min(density * bonusMultiplier, 1.0),
-    details: [`${totalClusters} high-tech clusters`, `${uniqueTerms.length} unique terms`],
-    foundTerms: uniqueTerms.slice(0, 10),
-    bonusMultiplier
-  };
-};
-
-// **KEY ADDITION: Pattern Multiplier for Flagrant Cases**
-const calculatePatternMultiplier = (scores, details, words, sentences) => {
-  let activePatterns = Object.keys(scores).length;
-  let flagrantIndicators = 0;
-  
-  // Count flagrant indicators
-  if (scores.technicalClustering > 0.3) flagrantIndicators++;
-  if (scores.buzzwordClustering > 0.3) flagrantIndicators++;
-  if (scores.lackPersonalVoice > 0.5) flagrantIndicators++;
-  if (scores.perfectGrammar > 0.5) flagrantIndicators++;
-  if (scores.transitionOveruse > 0.3) flagrantIndicators++;
-  if (scores.repetitiveSentenceStarters > 0.3) flagrantIndicators++;
-  
-  // Additional checks for extremely AI-like content
-  if (words.length > 500 && sentences.length > 20) {
-    // Long formal document - apply stricter standards
-    if (activePatterns >= 6 && flagrantIndicators >= 3) {
-      return 1.4; // 40% boost for obvious AI content
-    } else if (activePatterns >= 4 && flagrantIndicators >= 2) {
-      return 1.2; // 20% boost for likely AI content
-    }
+  // Generate suggestions based on detected patterns
+  if (analysis.scores.lackPersonalVoice > 0.3) {
+    insights.suggestions.push('Add personal examples, experiences, or opinions');
+  }
+  if (analysis.scores.technicalClustering > 0.3) {
+    insights.suggestions.push('Use simpler, more conversational language');
+  }
+  if (analysis.scores.perfectGrammar > 0.3) {
+    insights.suggestions.push('Include some contractions and informal expressions');
+  }
+  if (analysis.scores.artificialNeutrality > 0.3) {
+    insights.suggestions.push('Take clearer stances on topics and express stronger opinions');
+  }
+  if (analysis.scores.repetitiveStructure > 0.3) {
+    insights.suggestions.push('Vary sentence lengths and paragraph structures');
   }
   
-  return 1.0; // No multiplier for borderline cases
+  // Context-specific notes
+  if (context === 'casual' && analysis.confidence.level !== 'Minimal') {
+    insights.contextNote = 'For casual content, this level of formality and structure is unusual';
+  } else if (context === 'academic' && analysis.confidence.level === 'High') {
+    insights.contextNote = 'Even for academic writing, this shows unusually consistent AI patterns';
+  }
+  
+  return insights;
 };
 
 export const analyzeText = (text) => {
@@ -341,149 +377,121 @@ export const analyzeText = (text) => {
   if (words.length < 50) {
     return {
       score: 0,
+      confidence: { level: 'Insufficient', certainty: 'Text too short for analysis' },
       details: ['Text too short for reliable analysis (minimum 50 words required)'],
+      insights: { primaryConcerns: [], suggestions: [], contextNote: 'Need more content to analyze' },
       metrics: { words: words.length, sentences: sentences.length, paragraphs: paragraphs.length }
     };
   }
+
+  // Detect content context
+  const context = detectContentContext(text, words);
+  const thresholds = contextualThresholds[context];
 
   let scores = {};
   let details = [];
   let totalScore = 0;
 
-  // Paragraph length analysis
-  if (paragraphs.length > 2) {
-    const paragraphSentenceCounts = paragraphs.map(p => 
-      p.split(/[.!?]+/).filter(s => s.trim().length > 10).length
-    );
-    const paragraphVariance = calculateVariance(paragraphSentenceCounts);
-    const avgParagraphLength = paragraphSentenceCounts.reduce((sum, count) => sum + count, 0) / paragraphSentenceCounts.length;
-    
-    if (paragraphVariance < 2.0 && avgParagraphLength > 2 && paragraphs.length > 3) { // Slightly more lenient
-      scores.uniformParagraphLength = Math.min(1.2 - (paragraphVariance / 2), 0.9); // More aggressive
-      details.push(`Suspiciously uniform paragraph lengths (variance: ${paragraphVariance.toFixed(2)})`);
-    }
-  }
-
-  // Sentence starter repetition analysis
-  const starterAnalysis = analyzeSentenceStarters(sentences);
-  if (starterAnalysis.repetitive) {
-    scores.repetitiveSentenceStarters = starterAnalysis.score;
-    details.push(`Repetitive sentence starters: ${starterAnalysis.details.join(', ')}`);
-  }
-
-  // List structure analysis
-  const listAnalysis = analyzeListStructure(text);
-  if (listAnalysis.uniform) {
-    scores.uniformListStructure = listAnalysis.score;
-    details.push(`Uniform list structure detected: ${listAnalysis.details.join(', ')}`);
-  }
+  // Analyze semantic clusters
+  const clusters = analyzeSemanticClusters(text, sentences);
+  
+  // Modern AI pattern analysis
+  const modernPatterns = analyzeModernAIPatterns(text, sentences, words);
+  Object.assign(scores, modernPatterns);
 
   // Technical term clustering analysis
-  const techAnalysis = analyzeTechnicalClustering(text, words);
-  if (techAnalysis.clustered) {
-    scores.technicalClustering = techAnalysis.score;
-    details.push(`High technical jargon clustering: ${techAnalysis.details.join(', ')}`);
-    if (techAnalysis.foundTerms.length > 0) {
-      details.push(`Key terms: ${techAnalysis.foundTerms.slice(0, 5).join(', ')}`);
+  const technicalTerms = [...wordLists.aiTechnicalTerms, ...wordLists.buzzwordVerbs, ...wordLists.abstractNouns];
+  let clusterScore = 0;
+  let foundTerms = [];
+  
+  sentences.forEach(sentence => {
+    const sentenceTerms = technicalTerms.filter(term => 
+      sentence.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    if (sentenceTerms.length > 0) { // Even single terms contribute
+      clusterScore += sentenceTerms.length * 0.3;
+      foundTerms.push(...sentenceTerms);
     }
-    if (techAnalysis.bonusMultiplier > 1) {
-      details.push(`Extremely high technical density detected (${techAnalysis.bonusMultiplier}x multiplier)`);
-    }
+  });
+  
+  if (clusterScore > 0.5) {
+    const density = clusterScore / sentences.length;
+    scores.technicalClustering = Math.min(density * 1.5, 1.0);
+    const uniqueTerms = [...new Set(foundTerms)];
+    details.push(`Technical jargon detected: ${uniqueTerms.slice(0, 3).join(', ')}`);
   }
 
-  // Enhanced buzzword analysis
-  let buzzwordScore = 0;
+  // Buzzword analysis - show even single instances
   const buzzwordResult = countWords(text, wordLists.buzzwordVerbs);
-  buzzwordScore += buzzwordResult.count * 0.5; // Increased weight
-  
   const abstractNounResult = countWords(text, wordLists.abstractNouns);
-  buzzwordScore += abstractNounResult.count * 0.4; // Increased weight
-  
   const adjectiveResult = countWords(text, wordLists.commonAdjectives);
-  buzzwordScore += adjectiveResult.count * 0.3; // Increased weight
   
-  if (buzzwordScore > 1.5) { // Lowered threshold
+  let buzzwordScore = buzzwordResult.count * 0.4 + abstractNounResult.count * 0.3 + adjectiveResult.count * 0.2;
+  
+  if (buzzwordScore > 0) { // Show even single buzzwords
     const buzzwordDensity = buzzwordScore / words.length * 1000;
-    scores.buzzwordClustering = Math.min(buzzwordDensity / 6, 1); // More aggressive (was /8)
-    details.push(`Buzzword clustering detected (score: ${buzzwordScore.toFixed(1)})`);
-  }
-
-  // Predictable opener analysis
-  const openerResult = countPhrases(text, wordLists.predictableOpeners);
-  if (openerResult.count > 0) {
-    scores.predictableOpeners = Math.min(openerResult.count * 0.6, 1); // More aggressive
-    details.push(`Predictable openers found: ${openerResult.foundPhrases.slice(0, 2).join(', ')}`);
-  }
-
-  // Pseudo-insight phrase analysis
-  const pseudoInsightResult = countPhrases(text, wordLists.pseudoInsightPhrases);
-  if (pseudoInsightResult.count > 0) {
-    scores.pseudoInsightOveruse = Math.min(pseudoInsightResult.count * 0.7, 1); // More aggressive
-    details.push(`Pseudo-insight phrases: ${pseudoInsightResult.foundPhrases.slice(0, 2).join(', ')}`);
-  }
-
-  // Palpable words analysis
-  const palpableResult = countWords(text, wordLists.palpableWords);
-  if (palpableResult.count > 0) { // Lowered from > 1
-    scores.palpableOveruse = Math.min(palpableResult.count * 0.4, 1); // More aggressive
-    details.push(`Overuse of descriptive "palpable-type" words: ${palpableResult.foundWords.slice(0, 3).join(', ')}`);
+    scores.buzzwordClustering = Math.min(buzzwordDensity / 8, 1);
+    details.push(`AI-style buzzwords found (${buzzwordScore.toFixed(1)} total)`);
   }
 
   // Hedging language analysis
-  const hedgingResult = countWords(text, wordLists.hedgingLanguage);
-  const hedgingDensity = hedgingResult.count / sentences.length;
-  if (hedgingDensity > 0.2) { // Lowered threshold
-    scores.hedgingLanguage = Math.min(hedgingDensity * 3, 1); // More aggressive
-    details.push(`Excessive hedging language (${(hedgingDensity * 100).toFixed(1)}% of sentences)`);
+  const hedgingResult = countWords(text, wordLists.modernHedging);
+  if (hedgingResult.count > 0) {
+    const hedgingDensity = hedgingResult.count / sentences.length;
+    scores.modernHedging = Math.min(hedgingDensity * 2, 0.8);
+    details.push(`Modern AI hedging patterns: ${hedgingResult.foundWords.slice(0, 2).join(', ')}`);
   }
 
   // Transition word analysis
   const transitionResult = countWords(text, wordLists.transitions);
-  const transitionDensity = transitionResult.count / sentences.length;
-  
-  if (transitionDensity > 0.2) { // Lowered threshold
-    scores.transitionOveruse = Math.min(transitionDensity * 3, 1); // More aggressive
-    details.push(`High transition word density: ${(transitionDensity * 100).toFixed(1)}% of sentences`);
+  if (transitionResult.count > 0) {
+    const transitionDensity = transitionResult.count / sentences.length;
+    if (transitionDensity > thresholds.complexSentences) {
+      scores.transitionOveruse = Math.min(transitionDensity * 2, 1);
+      details.push(`High transition density: ${(transitionDensity * 100).toFixed(1)}% of sentences`);
+    }
   }
 
-  // Sentence length consistency
+  // Personal voice analysis - always show if missing
+  const personalResult = countWords(text, personalIndicators);
+  if (personalResult.count === 0 && words.length > 100) {
+    scores.lackPersonalVoice = 0.6; // Always flag complete absence
+    details.push("No personal voice indicators detected");
+  } else if (personalResult.count > 0) {
+    details.push(`Personal voice detected: ${personalResult.foundWords.slice(0, 2).join(', ')}`);
+  }
+
+  // Perfect grammar analysis
+  const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
+  if (contractionCount === 0 && words.length > 150) {
+    scores.perfectGrammar = 0.5; // Show even for moderate texts
+    details.push("No contractions - unnaturally formal");
+  }
+
+  // Sentence structure analysis
   if (sentences.length > 5) {
     const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length);
     const sentenceVariance = calculateVariance(sentenceLengths);
     const avgSentenceLength = sentenceLengths.reduce((sum, len) => sum + len, 0) / sentenceLengths.length;
     
-    if (sentenceVariance < 30 && avgSentenceLength > 10) { // More lenient but still catches patterns
-      scores.consistentSentenceLength = Math.min(1.5 - (sentenceVariance / 20), 0.8);
-      details.push(`Sentences too consistent in length (variance: ${sentenceVariance.toFixed(1)})`);
+    if (sentenceVariance < 35 && avgSentenceLength > 12) {
+      scores.consistentSentenceLength = Math.min((50 - sentenceVariance) / 50, 0.7);
+      details.push(`Consistent sentence lengths (variance: ${sentenceVariance.toFixed(1)})`);
     }
   }
 
-  // Rhetorical questions
-  const questionCount = sentences.filter(s => s.trim().includes('?')).length;
-  if (questionCount === 0 && sentences.length > 8) { // Lowered threshold
-    scores.noRhetoricalQuestions = 0.7; // Increased penalty
-    details.push("No rhetorical questions found in substantial text");
-  }
-
-  // Contraction analysis
-  const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
-  if (contractionCount === 0 && words.length > 150) { // Lowered threshold
-    scores.perfectGrammar = 0.8; // Increased penalty
-    details.push("No contractions found - unnaturally formal");
-  }
-
-  // Personal voice analysis
-  const personalResult = countWords(text, personalIndicators);
-  if (personalResult.count === 0 && words.length > 150) { // Lowered threshold
-    scores.lackPersonalVoice = 0.9; // Increased penalty
-    details.push("No personal voice indicators detected");
-  }
-
-  // Platitude detection
-  const platitudeResult = countPhrases(text, wordLists.platitudes);
-  if (platitudeResult.count > 0) {
-    scores.platitudeOveruse = Math.min(platitudeResult.count * 0.5, 1); // More aggressive
-    details.push(`Platitudes found: ${platitudeResult.foundPhrases.slice(0, 2).join(', ')}`);
+  // Paragraph uniformity
+  if (paragraphs.length > 2) {
+    const paragraphSentenceCounts = paragraphs.map(p => 
+      p.split(/[.!?]+/).filter(s => s.trim().length > 10).length
+    );
+    const paragraphVariance = calculateVariance(paragraphSentenceCounts);
+    
+    if (paragraphVariance < 2.5 && paragraphs.length > 3) {
+      scores.uniformParagraphLength = Math.min((4 - paragraphVariance) / 4, 0.8);
+      details.push(`Uniform paragraph structure (variance: ${paragraphVariance.toFixed(2)})`);
+    }
   }
 
   // Calculate weighted total score
@@ -499,15 +507,13 @@ export const analyzeText = (text) => {
     totalScore += scores[key] * patternWeight;
   });
 
-  // **CRITICAL: Apply pattern multiplier for flagrant cases**
-  const patternMultiplier = calculatePatternMultiplier(scores, details, words, sentences);
-  totalScore *= patternMultiplier;
-  
-  if (patternMultiplier > 1) {
-    details.unshift(`Multiple AI patterns detected - confidence boost applied (${patternMultiplier}x)`);
-  }
-
+  // Apply context adjustment
+  totalScore *= contextualThresholds[context]?.formalTone || 1.0;
   totalScore = Math.min(totalScore, 1.0);
+
+  // Calculate confidence and generate insights
+  const confidence = calculateConfidenceLevel(scores, clusters, words, context);
+  const insights = generateActionableInsights({ scores, confidence }, context);
 
   // Enhanced metrics
   const avgParagraphLength = paragraphs.length > 0 ? 
@@ -516,26 +522,25 @@ export const analyzeText = (text) => {
     (words.length / sentences.length).toFixed(1) : '0';
   const buzzwordDensity = words.length > 0 ? 
     ((buzzwordResult.count + abstractNounResult.count) / words.length * 1000).toFixed(2) : '0';
-  const technicalTermDensity = words.length > 0 ?
-    (techAnalysis.foundTerms.length / words.length * 1000).toFixed(2) : '0';
 
   return {
     score: totalScore,
+    confidence,
     details: details.length > 0 ? details : ['No significant AI patterns detected'],
+    insights,
+    clusters: clusters.length,
+    context,
     metrics: {
       words: words.length,
       sentences: sentences.length,
       paragraphs: paragraphs.length,
       avgParagraphLength,
       avgSentenceLength,
-      transitionDensity: (transitionDensity * 100).toFixed(1),
+      buzzwordDensity,
       personalVoice: personalResult.count > 0,
       contractions: contractionCount,
-      buzzwordDensity,
-      technicalTermDensity,
-      questions: questionCount,
-      listsFound: listAnalysis.details ? listAnalysis.details[0] : '0 lists found',
-      patternMultiplier: patternMultiplier
+      clustersFound: clusters.length,
+      contextType: context
     }
   };
 };
