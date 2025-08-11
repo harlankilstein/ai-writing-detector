@@ -1,5 +1,5 @@
 // Advanced AI Writing Pattern Analysis Engine
-// Shows all possibilities with appropriate confidence levels
+// Shows all possibilities with appropriate confidence levels and NaN protection
 
 const patterns = {
   structural: {
@@ -118,74 +118,85 @@ const personalIndicators = [
 
 // Context-aware thresholds
 const contextualThresholds = {
-  academic: {
-    technicalJargon: 0.15,
-    formalTone: 0.20,
-    complexSentences: 0.18,
-    buzzwords: 0.12
-  },
-  business: {
-    technicalJargon: 0.10,
-    formalTone: 0.15,
-    complexSentences: 0.12,
-    buzzwords: 0.08
-  },
-  creative: {
-    technicalJargon: 0.05,
-    formalTone: 0.08,
-    complexSentences: 0.10,
-    buzzwords: 0.04
-  },
-  casual: {
-    technicalJargon: 0.03,
-    formalTone: 0.05,
-    complexSentences: 0.08,
-    buzzwords: 0.03
+  academic: { technicalJargon: 0.15, formalTone: 0.20, complexSentences: 0.18, buzzwords: 0.12 },
+  business: { technicalJargon: 0.10, formalTone: 0.15, complexSentences: 0.12, buzzwords: 0.08 },
+  creative: { technicalJargon: 0.05, formalTone: 0.08, complexSentences: 0.10, buzzwords: 0.04 },
+  casual: { technicalJargon: 0.03, formalTone: 0.05, complexSentences: 0.08, buzzwords: 0.03 }
+};
+
+// CRITICAL: Safe math operations to prevent NaN
+const safeNumber = (value, defaultValue = 0) => {
+  if (value === null || value === undefined || isNaN(value) || !isFinite(value)) {
+    return defaultValue;
   }
+  return value;
+};
+
+const safeDivision = (numerator, denominator, defaultValue = 0) => {
+  if (denominator === 0 || isNaN(numerator) || isNaN(denominator) || !isFinite(numerator) || !isFinite(denominator)) {
+    return defaultValue;
+  }
+  const result = numerator / denominator;
+  return isNaN(result) || !isFinite(result) ? defaultValue : result;
 };
 
 const calculateVariance = (numbers) => {
-  if (numbers.length === 0) return 0;
-  const mean = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
-  const squaredDiffs = numbers.map(num => Math.pow(num - mean, 2));
-  return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / numbers.length;
+  if (!numbers || numbers.length === 0) return 0;
+  const validNumbers = numbers.filter(n => !isNaN(n) && isFinite(n));
+  if (validNumbers.length === 0) return 0;
+  
+  const mean = validNumbers.reduce((sum, num) => sum + num, 0) / validNumbers.length;
+  const squaredDiffs = validNumbers.map(num => Math.pow(num - mean, 2));
+  return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / validNumbers.length;
 };
 
 const countWords = (text, wordList) => {
+  if (!text || !wordList) return { count: 0, foundWords: [] };
+  
   const textLower = text.toLowerCase();
   let count = 0;
   let foundWords = [];
   
   wordList.forEach(word => {
-    const escapedWord = word.replace(/'/g, "'").replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi');
-    const matches = textLower.match(regex);
-    if (matches) {
-      count += matches.length;
-      foundWords.push(word);
+    if (!word) return;
+    try {
+      const escapedWord = word.replace(/'/g, "'").replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi');
+      const matches = textLower.match(regex);
+      if (matches) {
+        count += matches.length;
+        foundWords.push(word);
+      }
+    } catch (e) {
+      // Skip invalid regex patterns
     }
   });
   
-  return { count, foundWords };
+  return { count: safeNumber(count), foundWords };
 };
 
 const countPhrases = (text, phraseList) => {
+  if (!text || !phraseList) return { count: 0, foundPhrases: [] };
+  
   const textLower = text.toLowerCase();
   let count = 0;
   const foundPhrases = [];
   
   phraseList.forEach(phrase => {
+    if (!phrase) return;
     if (textLower.includes(phrase.toLowerCase())) {
       count++;
       foundPhrases.push(phrase);
     }
   });
   
-  return { count, foundPhrases };
+  return { count: safeNumber(count), foundPhrases };
 };
 
 // Detect content context to adjust thresholds
 const detectContentContext = (text, words) => {
+  if (!text || !words) return 'casual';
+  
   const academicIndicators = ['research', 'study', 'analysis', 'methodology', 'findings', 'conclusion'];
   const businessIndicators = ['strategy', 'growth', 'market', 'revenue', 'stakeholder', 'ROI'];
   const creativeIndicators = ['story', 'character', 'scene', 'narrative', 'plot', 'imagination'];
@@ -200,87 +211,11 @@ const detectContentContext = (text, words) => {
   return 'casual';
 };
 
-// Semantic clustering - group related AI indicators
-const analyzeSemanticClusters = (text, sentences) => {
-  const clusters = [];
-  let currentCluster = [];
-  
-  sentences.forEach((sentence, index) => {
-    const indicators = {
-      aiWords: countWords(sentence, [...wordLists.buzzwordVerbs, ...wordLists.abstractNouns]).count,
-      techTerms: countWords(sentence, wordLists.aiTechnicalTerms).count,
-      hedging: countPhrases(sentence, wordLists.modernHedging).count,
-      transitions: countWords(sentence, wordLists.transitions).count
-    };
-    
-    const totalIndicators = Object.values(indicators).reduce((sum, count) => sum + count, 0);
-    
-    if (totalIndicators >= 1) { // Any indicator starts a potential cluster
-      currentCluster.push({ 
-        sentence: index, 
-        indicators: totalIndicators,
-        types: Object.keys(indicators).filter(key => indicators[key] > 0)
-      });
-    } else if (currentCluster.length > 0) {
-      if (currentCluster.length >= 1) clusters.push([...currentCluster]); // Even single instances are clusters
-      currentCluster = [];
-    }
-  });
-  
-  if (currentCluster.length > 0) {
-    clusters.push(currentCluster);
-  }
-  
-  return clusters;
-};
-
-// Modern AI pattern detection
-const analyzeModernAIPatterns = (text, sentences, words) => {
-  const patterns = {};
-  
-  // Over-explanation detection
-  const explanationPhrases = countPhrases(text, wordLists.overExplanationPhrases);
-  if (explanationPhrases.count > 0) {
-    patterns.overExplaining = {
-      score: Math.min(explanationPhrases.count * 0.3, 0.8),
-      evidence: explanationPhrases.foundPhrases.slice(0, 2)
-    };
-  }
-  
-  // Artificial neutrality (lack of strong opinions)
-  const strongOpinions = ['definitely', 'absolutely', 'never', 'always', 'terrible', 'amazing', 'love', 'hate'];
-  const opinionCount = countWords(text, strongOpinions).count;
-  const neutralityRatio = sentences.length / Math.max(opinionCount, 1);
-  
-  if (neutralityRatio > 10 && sentences.length > 5) {
-    patterns.artificialNeutrality = {
-      score: Math.min(neutralityRatio / 20, 0.7),
-      evidence: `Only ${opinionCount} strong opinions in ${sentences.length} sentences`
-    };
-  }
-  
-  // Comprehensive language (AI being overly helpful)
-  const comprehensiveWords = ['comprehensive', 'thorough', 'detailed', 'complete', 'extensive', 'in-depth'];
-  const comprehensiveCount = countWords(text, comprehensiveWords);
-  if (comprehensiveCount.count > 0) {
-    patterns.comprehensiveLanguage = {
-      score: Math.min(comprehensiveCount.count * 0.25, 0.6),
-      evidence: comprehensiveCount.foundWords.slice(0, 3)
-    };
-  }
-  
-  return patterns;
-};
-
 // Calculate confidence level based on pattern convergence
 const calculateConfidenceLevel = (scores, clusters, words, context) => {
   const activePatterns = Object.keys(scores).length;
-  const strongPatterns = Object.values(scores).filter(score => score > 0.5).length;
-  const clusterCount = clusters.length;
-  const totalClusterSize = clusters.reduce((sum, cluster) => sum + cluster.length, 0);
-  
-  // Adjust for context
-  const contextMultiplier = context === 'academic' ? 0.8 : context === 'casual' ? 1.2 : 1.0;
+  const strongPatterns = Object.values(scores).filter(score => safeNumber(score) > 0.5).length;
+  const clusterCount = Array.isArray(clusters) ? clusters.length : 0;
   
   let confidence = 'Minimal';
   let certainty = 'Some isolated indicators detected';
@@ -308,70 +243,27 @@ const calculateConfidenceLevel = (scores, clusters, words, context) => {
     reasoning.push(`${clusterCount} clusters of AI indicators found`);
   }
   
-  if (totalClusterSize > 5) {
-    reasoning.push('High concentration of AI patterns');
-  }
-  
   return { 
     level: confidence, 
     certainty, 
     reasoning,
-    contextAdjustment: contextMultiplier !== 1.0 ? `Adjusted for ${context} context` : null
+    contextAdjustment: context !== 'casual' ? `Adjusted for ${context} context` : null
   };
-};
-
-// Generate actionable insights for users
-const generateActionableInsights = (analysis, context) => {
-  const insights = {
-    primaryConcerns: [],
-    suggestions: [],
-    contextNote: null
-  };
-  
-  // Identify primary concerns
-  const sortedScores = Object.entries(analysis.scores)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 3);
-  
-  sortedScores.forEach(([pattern, score]) => {
-    if (score > 0.3) {
-      const patternInfo = Object.values(patterns).find(group => group[pattern]);
-      if (patternInfo) {
-        insights.primaryConcerns.push(patternInfo[pattern].description);
-      }
-    }
-  });
-  
-  // Generate suggestions based on detected patterns
-  if (analysis.scores.lackPersonalVoice > 0.3) {
-    insights.suggestions.push('Add personal examples, experiences, or opinions');
-  }
-  if (analysis.scores.technicalClustering > 0.3) {
-    insights.suggestions.push('Use simpler, more conversational language');
-  }
-  if (analysis.scores.perfectGrammar > 0.3) {
-    insights.suggestions.push('Include some contractions and informal expressions');
-  }
-  if (analysis.scores.artificialNeutrality > 0.3) {
-    insights.suggestions.push('Take clearer stances on topics and express stronger opinions');
-  }
-  if (analysis.scores.repetitiveStructure > 0.3) {
-    insights.suggestions.push('Vary sentence lengths and paragraph structures');
-  }
-  
-  // Context-specific notes
-  if (context === 'casual' && analysis.confidence.level !== 'Minimal') {
-    insights.contextNote = 'For casual content, this level of formality and structure is unusual';
-  } else if (context === 'academic' && analysis.confidence.level === 'High') {
-    insights.contextNote = 'Even for academic writing, this shows unusually consistent AI patterns';
-  }
-  
-  return insights;
 };
 
 export const analyzeText = (text) => {
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
-  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  // Input validation and sanitization
+  if (!text || typeof text !== 'string') {
+    return {
+      score: 0,
+      confidence: { level: 'Insufficient', certainty: 'No text provided' },
+      details: ['No text provided for analysis'],
+      metrics: { words: 0, sentences: 0, paragraphs: 0 }
+    };
+  }
+
+  const sentences = text.split(/[.!?]+/).filter(s => s && s.trim().length > 10);
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p && p.trim().length > 0);
   const words = text.toLowerCase().match(/\b\w+\b/g) || [];
   
   if (words.length < 50) {
@@ -379,122 +271,93 @@ export const analyzeText = (text) => {
       score: 0,
       confidence: { level: 'Insufficient', certainty: 'Text too short for analysis' },
       details: ['Text too short for reliable analysis (minimum 50 words required)'],
-      insights: { primaryConcerns: [], suggestions: [], contextNote: 'Need more content to analyze' },
       metrics: { words: words.length, sentences: sentences.length, paragraphs: paragraphs.length }
     };
   }
 
   // Detect content context
   const context = detectContentContext(text, words);
-  const thresholds = contextualThresholds[context];
+  const thresholds = contextualThresholds[context] || contextualThresholds.casual;
 
   let scores = {};
   let details = [];
   let totalScore = 0;
 
-  // Analyze semantic clusters
-  const clusters = analyzeSemanticClusters(text, sentences);
-  
-  // Modern AI pattern analysis
-  const modernPatterns = analyzeModernAIPatterns(text, sentences, words);
-  Object.assign(scores, modernPatterns);
-
-  // Technical term clustering analysis
+  // Technical term analysis with safe operations
   const technicalTerms = [...wordLists.aiTechnicalTerms, ...wordLists.buzzwordVerbs, ...wordLists.abstractNouns];
   let clusterScore = 0;
   let foundTerms = [];
   
   sentences.forEach(sentence => {
+    if (!sentence) return;
     const sentenceTerms = technicalTerms.filter(term => 
-      sentence.toLowerCase().includes(term.toLowerCase())
+      term && sentence.toLowerCase().includes(term.toLowerCase())
     );
     
-    if (sentenceTerms.length > 0) { // Even single terms contribute
+    if (sentenceTerms.length > 0) {
       clusterScore += sentenceTerms.length * 0.3;
       foundTerms.push(...sentenceTerms);
     }
   });
   
   if (clusterScore > 0.5) {
-    const density = clusterScore / sentences.length;
+    const density = safeDivision(clusterScore, sentences.length);
     scores.technicalClustering = Math.min(density * 1.5, 1.0);
     const uniqueTerms = [...new Set(foundTerms)];
     details.push(`Technical jargon detected: ${uniqueTerms.slice(0, 3).join(', ')}`);
   }
 
-  // Buzzword analysis - show even single instances
+  // Buzzword analysis with safe operations
   const buzzwordResult = countWords(text, wordLists.buzzwordVerbs);
   const abstractNounResult = countWords(text, wordLists.abstractNouns);
   const adjectiveResult = countWords(text, wordLists.commonAdjectives);
   
-  let buzzwordScore = buzzwordResult.count * 0.4 + abstractNounResult.count * 0.3 + adjectiveResult.count * 0.2;
+  let buzzwordScore = safeNumber(buzzwordResult.count * 0.4 + abstractNounResult.count * 0.3 + adjectiveResult.count * 0.2);
   
-  if (buzzwordScore > 0) { // Show even single buzzwords
-    const buzzwordDensity = buzzwordScore / words.length * 1000;
-    scores.buzzwordClustering = Math.min(buzzwordDensity / 8, 1);
+  if (buzzwordScore > 0) {
+    const buzzwordDensity = safeDivision(buzzwordScore, words.length) * 1000;
+    scores.buzzwordClustering = Math.min(safeDivision(buzzwordDensity, 8), 1);
     details.push(`AI-style buzzwords found (${buzzwordScore.toFixed(1)} total)`);
   }
 
-  // Hedging language analysis
-  const hedgingResult = countWords(text, wordLists.modernHedging);
-  if (hedgingResult.count > 0) {
-    const hedgingDensity = hedgingResult.count / sentences.length;
-    scores.modernHedging = Math.min(hedgingDensity * 2, 0.8);
-    details.push(`Modern AI hedging patterns: ${hedgingResult.foundWords.slice(0, 2).join(', ')}`);
+  // Personal voice analysis
+  const personalResult = countWords(text, personalIndicators);
+  if (personalResult.count === 0 && words.length > 100) {
+    scores.lackPersonalVoice = 0.6;
+    details.push("No personal voice indicators detected");
+  }
+
+  // Perfect grammar analysis
+  const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
+  if (contractionCount === 0 && words.length > 150) {
+    scores.perfectGrammar = 0.5;
+    details.push("No contractions - unnaturally formal");
   }
 
   // Transition word analysis
   const transitionResult = countWords(text, wordLists.transitions);
   if (transitionResult.count > 0) {
-    const transitionDensity = transitionResult.count / sentences.length;
+    const transitionDensity = safeDivision(transitionResult.count, sentences.length);
     if (transitionDensity > thresholds.complexSentences) {
       scores.transitionOveruse = Math.min(transitionDensity * 2, 1);
       details.push(`High transition density: ${(transitionDensity * 100).toFixed(1)}% of sentences`);
     }
   }
 
-  // Personal voice analysis - always show if missing
-  const personalResult = countWords(text, personalIndicators);
-  if (personalResult.count === 0 && words.length > 100) {
-    scores.lackPersonalVoice = 0.6; // Always flag complete absence
-    details.push("No personal voice indicators detected");
-  } else if (personalResult.count > 0) {
-    details.push(`Personal voice detected: ${personalResult.foundWords.slice(0, 2).join(', ')}`);
-  }
-
-  // Perfect grammar analysis
-  const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
-  if (contractionCount === 0 && words.length > 150) {
-    scores.perfectGrammar = 0.5; // Show even for moderate texts
-    details.push("No contractions - unnaturally formal");
-  }
-
   // Sentence structure analysis
   if (sentences.length > 5) {
-    const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length);
+    const sentenceLengths = sentences.map(s => s.trim().split(/\s+/).length).filter(len => !isNaN(len));
     const sentenceVariance = calculateVariance(sentenceLengths);
-    const avgSentenceLength = sentenceLengths.reduce((sum, len) => sum + len, 0) / sentenceLengths.length;
+    const avgSentenceLength = sentenceLengths.length > 0 ? 
+      sentenceLengths.reduce((sum, len) => sum + len, 0) / sentenceLengths.length : 0;
     
     if (sentenceVariance < 35 && avgSentenceLength > 12) {
-      scores.consistentSentenceLength = Math.min((50 - sentenceVariance) / 50, 0.7);
+      scores.consistentSentenceLength = Math.min(safeDivision(50 - sentenceVariance, 50), 0.7);
       details.push(`Consistent sentence lengths (variance: ${sentenceVariance.toFixed(1)})`);
     }
   }
 
-  // Paragraph uniformity
-  if (paragraphs.length > 2) {
-    const paragraphSentenceCounts = paragraphs.map(p => 
-      p.split(/[.!?]+/).filter(s => s.trim().length > 10).length
-    );
-    const paragraphVariance = calculateVariance(paragraphSentenceCounts);
-    
-    if (paragraphVariance < 2.5 && paragraphs.length > 3) {
-      scores.uniformParagraphLength = Math.min((4 - paragraphVariance) / 4, 0.8);
-      details.push(`Uniform paragraph structure (variance: ${paragraphVariance.toFixed(2)})`);
-    }
-  }
-
-  // Calculate weighted total score
+  // Calculate weighted total score with safe operations
   Object.keys(scores).forEach(key => {
     let patternWeight = 0.1;
     
@@ -504,31 +367,34 @@ export const analyzeText = (text) => {
       }
     });
     
-    totalScore += scores[key] * patternWeight;
+    const scoreValue = safeNumber(scores[key]);
+    totalScore += scoreValue * patternWeight;
   });
 
-  // Apply context adjustment
-  totalScore *= contextualThresholds[context]?.formalTone || 1.0;
-  totalScore = Math.min(totalScore, 1.0);
+  // CRITICAL: Apply context adjustment and ensure totalScore is never NaN
+  totalScore *= safeNumber(thresholds.formalTone, 1.0);
+  totalScore = safeNumber(Math.min(totalScore, 1.0));
+  
+  // Double-check: Ensure score is never NaN, negative, or invalid
+  if (isNaN(totalScore) || totalScore < 0 || !isFinite(totalScore)) {
+    totalScore = 0;
+  }
 
-  // Calculate confidence and generate insights
-  const confidence = calculateConfidenceLevel(scores, clusters, words, context);
-  const insights = generateActionableInsights({ scores, confidence }, context);
+  // Calculate confidence
+  const confidence = calculateConfidenceLevel(scores, [], words, context);
 
-  // Enhanced metrics
+  // Enhanced metrics with safe operations
   const avgParagraphLength = paragraphs.length > 0 ? 
-    (sentences.length / paragraphs.length).toFixed(1) : '0';
+    safeDivision(sentences.length, paragraphs.length).toFixed(1) : '0';
   const avgSentenceLength = sentences.length > 0 ? 
-    (words.length / sentences.length).toFixed(1) : '0';
+    safeDivision(words.length, sentences.length).toFixed(1) : '0';
   const buzzwordDensity = words.length > 0 ? 
-    ((buzzwordResult.count + abstractNounResult.count) / words.length * 1000).toFixed(2) : '0';
+    safeDivision((buzzwordResult.count + abstractNounResult.count), words.length).toFixed(4) : '0';
 
   return {
-    score: totalScore,
+    score: safeNumber(totalScore), // Final safety check
     confidence,
     details: details.length > 0 ? details : ['No significant AI patterns detected'],
-    insights,
-    clusters: clusters.length,
     context,
     metrics: {
       words: words.length,
@@ -539,7 +405,6 @@ export const analyzeText = (text) => {
       buzzwordDensity,
       personalVoice: personalResult.count > 0,
       contractions: contractionCount,
-      clustersFound: clusters.length,
       contextType: context
     }
   };
