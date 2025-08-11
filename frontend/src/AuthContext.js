@@ -12,98 +12,105 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem('token'));
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
+  // Check if user is authenticated on app load
   useEffect(() => {
-    if (token) {
-      fetchCurrentUser();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+    const checkAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${storedToken}`
+            }
+          });
 
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await fetch(BACKEND_URL + '/api/auth/me', {
-        headers: {
-          'Authorization': 'Bearer ' + token
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            setToken(storedToken);
+          } else {
+            // Token invalid, remove it
+            localStorage.removeItem('token');
+            setToken(null);
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          localStorage.removeItem('token');
+          setToken(null);
         }
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else {
-        logout();
       }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      logout();
-    } finally {
       setLoading(false);
-    }
-  };
+    };
+
+    checkAuth();
+  }, [BACKEND_URL]);
 
   const signup = async (email, password) => {
-    const response = await fetch(BACKEND_URL + '/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Signup failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Signup failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.access_token);
+      setToken(data.access_token);
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      throw error;
     }
-
-    const data = await response.json();
-    setToken(data.access_token);
-    setUser(data.user);
-    localStorage.setItem('token', data.access_token);
-    
-    return data;
   };
 
   const login = async (email, password) => {
-    const response = await fetch(BACKEND_URL + '/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Login failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.access_token);
+      setToken(data.access_token);
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      throw error;
     }
-
-    const data = await response.json();
-    setToken(data.access_token);
-    setUser(data.user);
-    localStorage.setItem('token', data.access_token);
-    
-    return data;
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token');
   };
 
-  const isAuthenticated = !!user && !!token;
-
   const getTrialDaysLeft = () => {
-    if (!user || !user.trial_expires) return 0;
+    if (!user || user.subscription_status !== 'trial') return 0;
     
-    const trialExpires = new Date(user.trial_expires);
     const now = new Date();
+    const trialExpires = new Date(user.trial_expires);
     const diffTime = trialExpires - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
@@ -111,9 +118,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isTrialExpired = () => {
-    if (!user) return false;
-    if (user.subscription_status !== 'trial') return false;
-    return getTrialDaysLeft() <= 0;
+    if (!user || user.subscription_status !== 'trial') return false;
+    
+    const now = new Date();
+    const trialExpires = new Date(user.trial_expires);
+    return now > trialExpires;
   };
 
   const value = {
@@ -123,14 +132,10 @@ export const AuthProvider = ({ children }) => {
     signup,
     login,
     logout,
-    isAuthenticated,
     getTrialDaysLeft,
-    isTrialExpired
+    isTrialExpired,
+    isAuthenticated: !!token,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
