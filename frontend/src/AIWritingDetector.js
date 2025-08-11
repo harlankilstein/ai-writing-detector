@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, CheckCircle, BarChart3, FileX, Globe, LogOut } from 'lucide-react';
 import { analyzeText } from './textAnalyzer';
-import { parseDocument, validateFileSize, validateFileType } from './documentParser';
+import { parseDocument } from './documentParser';
 import { useAuth } from './AuthContext';
 import AuthModal from './AuthModal';
 import TrialStatus from './TrialStatus';
@@ -21,43 +21,35 @@ const AIWritingDetector = () => {
   const { user, token, logout, isAuthenticated, loading: authLoading, isTrialExpired } = useAuth();
 
   const getLikertRating = (score) => {
-    if (score < 0.2) {
-      return { 
-        level: 'Very Unlikely AI', 
-        color: 'text-green-700', 
-        bgColor: 'bg-green-50 border-green-200',
-        barColor: 'bg-green-500'
-      };
-    }
-    if (score < 0.4) {
-      return { 
-        level: 'Unlikely AI', 
-        color: 'text-green-600', 
-        bgColor: 'bg-green-25 border-green-100',
-        barColor: 'bg-green-400'
-      };
-    }
-    if (score < 0.6) {
-      return { 
-        level: 'Possibly AI', 
-        color: 'text-yellow-700', 
-        bgColor: 'bg-yellow-50 border-yellow-200',
-        barColor: 'bg-yellow-500'
-      };
-    }
-    if (score < 0.8) {
-      return { 
-        level: 'Likely AI', 
-        color: 'text-orange-700', 
-        bgColor: 'bg-orange-50 border-orange-200',
-        barColor: 'bg-orange-500'
-      };
-    }
+    if (score < 0.2) return { 
+      level: "Very Unlikely AI", 
+      color: "text-green-700", 
+      bgColor: "bg-green-50 border-green-200",
+      barColor: "bg-green-500"
+    };
+    if (score < 0.4) return { 
+      level: "Unlikely AI", 
+      color: "text-green-600", 
+      bgColor: "bg-green-25 border-green-100",
+      barColor: "bg-green-400"
+    };
+    if (score < 0.6) return { 
+      level: "Possibly AI", 
+      color: "text-yellow-700", 
+      bgColor: "bg-yellow-50 border-yellow-200",
+      barColor: "bg-yellow-500"
+    };
+    if (score < 0.8) return { 
+      level: "Likely AI", 
+      color: "text-orange-700", 
+      bgColor: "bg-orange-50 border-orange-200",
+      barColor: "bg-orange-500"
+    };
     return { 
-      level: 'Very Likely AI', 
-      color: 'text-red-700', 
-      bgColor: 'bg-red-50 border-red-200',
-      barColor: 'bg-red-500'
+      level: "Very Likely AI", 
+      color: "text-red-700", 
+      bgColor: "bg-red-50 border-red-200",
+      barColor: "bg-red-500"
     };
   };
 
@@ -65,14 +57,12 @@ const AIWritingDetector = () => {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Check authentication
     if (!isAuthenticated) {
       setAuthMode('signup');
       setShowAuthModal(true);
       return;
     }
 
-    // Check trial status
     if (isTrialExpired()) {
       setError('Your trial has expired. Please upgrade to continue using the service.');
       return;
@@ -85,18 +75,12 @@ const AIWritingDetector = () => {
     setAnalysisSource('file');
     
     try {
-      // Validate file
-      validateFileSize(file, 10);
-      validateFileType(file);
-      
-      // Parse document
       const text = await parseDocument(file);
       
       if (!text || text.trim().length < 50) {
         throw new Error('Document appears to be empty or too short to analyze (minimum 50 characters required).');
       }
 
-      // Analyze with real AI detection
       const analysisResult = analyzeText(text);
       setAnalysis(analysisResult);
     } catch (err) {
@@ -110,14 +94,12 @@ const AIWritingDetector = () => {
   const handleGoogleDocAnalysis = async () => {
     if (!googleDocUrl.trim()) return;
     
-    // Check authentication
     if (!isAuthenticated) {
       setAuthMode('signup');
       setShowAuthModal(true);
       return;
     }
 
-    // Check trial status
     if (isTrialExpired()) {
       setError('Your trial has expired. Please upgrade to continue using the service.');
       return;
@@ -129,11 +111,11 @@ const AIWritingDetector = () => {
     setAnalysisSource('google-doc');
     
     try {
-      const response = await fetch(BACKEND_URL + '/api/analyze-google-doc', {
+      const response = await fetch(`${BACKEND_URL}/api/analyze-google-doc`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           doc_url: googleDocUrl.trim()
@@ -159,7 +141,6 @@ const AIWritingDetector = () => {
         throw new Error('Google Doc appears to be empty or too short to analyze (minimum 50 characters required).');
       }
 
-      // Analyze with real AI detection
       const analysisResult = analyzeText(result.content);
       setAnalysis(analysisResult);
       
@@ -195,7 +176,6 @@ const AIWritingDetector = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto p-6">
-        {/* Header with Authentication */}
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-grow">
             <h1 className="text-4xl font-bold text-gray-800 mb-3">AI Writing Pattern Detector</h1>
@@ -205,7 +185,6 @@ const AIWritingDetector = () => {
             </p>
           </div>
 
-          {/* User Controls */}
           <div className="flex items-center space-x-4 ml-6">
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
@@ -242,18 +221,15 @@ const AIWritingDetector = () => {
           </div>
         </div>
 
-        {/* Trial Status */}
         {isAuthenticated && <TrialStatus />}
 
-        {/* Auth Modal */}
         <AuthModal 
           isOpen={showAuthModal} 
           onClose={() => setShowAuthModal(false)}
           mode={authMode}
         />
 
-        {/* File Upload */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="analysis-card mb-6">
           <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <Upload className="w-10 h-10 mb-3 text-gray-400" />
@@ -294,15 +270,13 @@ const AIWritingDetector = () => {
           )}
         </div>
 
-        {/* OR Divider */}
         <div className="flex items-center mb-6">
           <div className="flex-grow border-t border-gray-300"></div>
           <div className="mx-4 text-gray-500 font-medium">OR</div>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
 
-        {/* Google Docs Input */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="analysis-card mb-6">
           <div className="flex items-center mb-4">
             <Globe className="w-6 h-6 mr-3 text-blue-600" />
             <h3 className="text-lg font-semibold text-gray-800">Analyze Google Doc</h3>
@@ -333,6 +307,28 @@ const AIWritingDetector = () => {
             >
               {loading ? 'Analyzing Google Doc...' : 'Analyze Google Doc'}
             </button>
+            
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="text-xs text-gray-600 space-y-1">
+                <p><strong>How it works:</strong></p>
+                <p>• We extract text content directly from your Google Doc</p>
+                <p>• Advanced AI pattern analysis identifies writing characteristics</p>
+                <p>• Get detailed confidence scores and explanations</p>
+                <p>• Same accuracy as file uploads - now with improved extraction</p>
+              </div>
+            </div>
+            
+            <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <div className="text-xs text-gray-700 space-y-2">
+                <p><strong>⚠️ Important Disclaimer:</strong></p>
+                <p>AI and detection tools are constantly changing. Many AI tools give out false positives when something is 100% human content. Use all AI detection tools with caution.</p>
+                
+                <div className="pt-2 border-t border-yellow-200 mt-3">
+                  <p><strong>🔒 Privacy Policy:</strong></p>
+                  <p>We will never sell or spam your email address. It's not cool.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {googleDocUrl && (
@@ -359,9 +355,8 @@ const AIWritingDetector = () => {
           )}
         </div>
 
-        {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-lg shadow-md p-6 text-center py-12">
+          <div className="analysis-card text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-lg text-gray-600">
               {analysisSource === 'google-doc' ? 'Fetching and analyzing Google Doc...' : 'Analyzing writing patterns...'}
@@ -375,9 +370,8 @@ const AIWritingDetector = () => {
           </div>
         )}
 
-        {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+          <div className="analysis-card bg-red-50 border-red-200 mb-6">
             <div className="flex items-start">
               <AlertCircle className="w-6 h-6 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
               <div>
@@ -394,11 +388,9 @@ const AIWritingDetector = () => {
           </div>
         )}
 
-        {/* Analysis Results */}
         {analysis && (
           <div className="space-y-6">
-            {/* Overall Score */}
-            <div className={`bg-white rounded-lg shadow-md p-6 ${rating.bgColor} border-2`}>
+            <div className={`analysis-card ${rating.bgColor} border-2`}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Analysis Result</h2>
                 {analysis.score < 0.4 ? (
@@ -430,19 +422,19 @@ const AIWritingDetector = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-gray-50 rounded">
+                  <div className="metric-card">
                     <p className="text-2xl font-bold text-gray-800">{analysis.metrics.words}</p>
                     <p className="text-sm text-gray-600">Words</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded">
+                  <div className="metric-card">
                     <p className="text-2xl font-bold text-gray-800">{analysis.metrics.sentences}</p>
                     <p className="text-sm text-gray-600">Sentences</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded">
+                  <div className="metric-card">
                     <p className="text-2xl font-bold text-gray-800">{analysis.metrics.paragraphs}</p>
                     <p className="text-sm text-gray-600">Paragraphs</p>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded">
+                  <div className="metric-card">
                     <p className="text-2xl font-bold text-gray-800">{analysis.metrics.avgSentenceLength}</p>
                     <p className="text-sm text-gray-600">Avg Length</p>
                   </div>
@@ -450,8 +442,7 @@ const AIWritingDetector = () => {
               </div>
             </div>
 
-            {/* Detailed Analysis */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="analysis-card">
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <BarChart3 className="w-6 h-6 mr-2 text-blue-600" />
                 Pattern Analysis Details
@@ -474,8 +465,7 @@ const AIWritingDetector = () => {
               )}
             </div>
 
-            {/* Writing Characteristics */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="analysis-card">
               <h3 className="text-xl font-bold mb-4">Writing Characteristics</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
@@ -507,8 +497,7 @@ const AIWritingDetector = () => {
               </div>
             </div>
 
-            {/* Methodology */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="analysis-card bg-blue-50 border-blue-200">
               <h3 className="font-bold text-blue-800 mb-3">How This Analysis Works</h3>
               <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
                 <ul className="space-y-2">
