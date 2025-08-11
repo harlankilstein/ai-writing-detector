@@ -1,32 +1,32 @@
-// Advanced AI Writing Pattern Analysis Engine - 2025 Edition
+// Advanced AI Writing Pattern Analysis Engine - Aggressive Mode for Flagrant Content
 
 const patterns = {
   structural: {
-    uniformParagraphLength: { weight: 0.12, description: "Paragraphs are suspiciously uniform in length" },
-    transitionOveruse: { weight: 0.18, description: "Excessive use of transition words between sentences" },
-    consistentSentenceLength: { weight: 0.08, description: "Sentences are too consistent in length" },
-    repetitiveSentenceStarters: { weight: 0.15, description: "Repetitive sentence opening patterns" },
-    uniformListStructure: { weight: 0.10, description: "Lists consistently have same number of items" },
-    noRhetoricalQuestions: { weight: 0.06, description: "Complete absence of rhetorical questions" },
-    perfectGrammar: { weight: 0.08, description: "Unnaturally perfect grammar with no contractions" }
+    uniformParagraphLength: { weight: 0.15, description: "Paragraphs are suspiciously uniform in length" },
+    transitionOveruse: { weight: 0.22, description: "Excessive use of transition words between sentences" },
+    consistentSentenceLength: { weight: 0.12, description: "Sentences are too consistent in length" },
+    repetitiveSentenceStarters: { weight: 0.18, description: "Repetitive sentence opening patterns" },
+    uniformListStructure: { weight: 0.12, description: "Lists consistently have same number of items" },
+    noRhetoricalQuestions: { weight: 0.08, description: "Complete absence of rhetorical questions" },
+    perfectGrammar: { weight: 0.10, description: "Unnaturally perfect grammar with no contractions" }
   },
   
   content: {
-    technicalClustering: { weight: 0.20, description: "High concentration of technical jargon" },
-    buzzwordClustering: { weight: 0.18, description: "AI buzzwords appear in clusters" },
-    genericExamples: { weight: 0.10, description: "Uses only generic, textbook-style examples" },
-    balancedViewpoints: { weight: 0.12, description: "Artificially balanced viewpoints on all topics" },
-    lackPersonalVoice: { weight: 0.12, description: "No personal anecdotes, opinions, or voice" },
-    platitudeOveruse: { weight: 0.08, description: "Overuse of platitudes and generic statements" },
-    pseudoInsightOveruse: { weight: 0.14, description: "Overuse of pseudo-insightful phrases" }
+    technicalClustering: { weight: 0.25, description: "High concentration of technical jargon" },
+    buzzwordClustering: { weight: 0.22, description: "AI buzzwords appear in clusters" },
+    genericExamples: { weight: 0.12, description: "Uses only generic, textbook-style examples" },
+    balancedViewpoints: { weight: 0.15, description: "Artificially balanced viewpoints on all topics" },
+    lackPersonalVoice: { weight: 0.18, description: "No personal anecdotes, opinions, or voice" },
+    platitudeOveruse: { weight: 0.10, description: "Overuse of platitudes and generic statements" },
+    pseudoInsightOveruse: { weight: 0.16, description: "Overuse of pseudo-insightful phrases" }
   },
   
   language: {
-    formalityInconsistency: { weight: 0.10, description: "Inappropriately formal tone for casual topics" },
-    repetitiveStructure: { weight: 0.12, description: "Repetitive sentence and paragraph structures" },
-    lackIdioms: { weight: 0.08, description: "Complete absence of idioms or colloquialisms" },
-    hedgingLanguage: { weight: 0.10, description: "Excessive use of hedging/qualifying language" },
-    palpableOveruse: { weight: 0.12, description: "Overuse of overly descriptive 'palpable' type words" }
+    formalityInconsistency: { weight: 0.12, description: "Inappropriately formal tone for casual topics" },
+    repetitiveStructure: { weight: 0.15, description: "Repetitive sentence and paragraph structures" },
+    lackIdioms: { weight: 0.10, description: "Complete absence of idioms or colloquialisms" },
+    hedgingLanguage: { weight: 0.12, description: "Excessive use of hedging/qualifying language" },
+    palpableOveruse: { weight: 0.14, description: "Overuse of overly descriptive 'palpable' type words" }
   }
 };
 
@@ -64,7 +64,20 @@ const wordLists = {
     'knowledge distillation', 'sparse attention mechanisms', 'digital twin environments',
     'autonomous cognitive ecosystems', 'artificial general intelligence', 'AGI',
     'post-transformer epoch', 'perplexity metrics', 'epistemic', 'probabilistic consistency',
-    'stateful sessions', 'edge deployment', 'federated learning paradigms'
+    'stateful sessions', 'edge deployment', 'federated learning paradigms',
+    'sub-millisecond', 'hyper-personalized', 'context-aware', 'trillions of parameters',
+    'fine-tuned via', 'domain-specific data curation', 'zero-shot and few-shot',
+    'supervised learning constraints', 'synergistic interplay', 'heterogeneous data streams',
+    'distributed vector databases', 'real-time contextual augmentation', 'mitigating hallucination',
+    'epistemic grounding fidelity', 'autonomous agent frameworks', 'message-passing protocols',
+    'policy-based decision trees', 'emergent behaviors facilitated', 'adaptive planning heuristics',
+    'probabilistic consistency across', 'resource-constrained devices', 'perplexity metrics',
+    'democratization of inference', 'privacy-preserving gradient aggregation',
+    'decentralized model refinement', 'differential privacy noise injection',
+    'AI governance frameworks', 'regulatory mandates', 'observability and explainability',
+    'SHAP value analysis', 'attention map visualization', 'model-agnostic interpretability',
+    'bias amplification', 'fairness metrics', 'demographic cohorts', 'drift detection',
+    'automated retraining workflows', 'divergence thresholds'
   ],
   
   // From your CSV - Common Adjectives
@@ -73,7 +86,9 @@ const wordLists = {
     'comprehensive', 'robust', 'strategic', 'transformative', 'insightful', 'innovative',
     'revolutionary', 'groundbreaking', 'pivotal', 'critical', 'essential', 'fundamental',
     'significant', 'notable', 'compelling', 'seamless', 'sophisticated', 'cutting-edge',
-    'state-of-the-art', 'next-generation', 'scalable', 'adaptive', 'intelligent'
+    'state-of-the-art', 'next-generation', 'scalable', 'adaptive', 'intelligent',
+    'high-fidelity', 'domain-specific', 'context-aware', 'privacy-preserving',
+    'model-agnostic', 'gradient-based', 'sub-symbolic', 'multi-objective'
   ],
   
   // From your CSV - Common Adverbs
@@ -81,7 +96,8 @@ const wordLists = {
     'literally', 'basically', 'truly', 'actually', 'essentially', 'simply', 'clearly',
     'obviously', 'undoubtedly', 'notably', 'importantly', 'significantly', 'remarkably',
     'especially', 'increasingly', 'largely', 'relatively', 'inherently', 'ideally',
-    'accordingly', 'systematically', 'methodically', 'substantially', 'fundamentally'
+    'accordingly', 'systematically', 'methodically', 'substantially', 'fundamentally',
+    'seamlessly', 'dynamically', 'proactively', 'autonomously', 'efficiently'
   ],
   
   // From your CSV - Palpable-Type Words
@@ -92,14 +108,18 @@ const wordLists = {
     'spine-tingling', 'bone-chilling', 'earth-shattering', 'mind-numbing', 'breathtaking'
   ],
   
-  // From your CSV - Predictable Openers & Closers
+  // From your CSV - Predictable Openers & Closers  
   predictableOpeners: [
     "in today's fast-paced world", "since the dawn of time", "it goes without saying",
     "let's delve into the intricacies", "as we explore the nuances", "it's important to understand",
     "without a doubt", "in conclusion", "to sum up", "this article will explore", "in essence",
     "at the end of the day", "a deeper understanding of", "in the current epoch",
     "the proliferation of", "ushering in an era", "underpinned by", "at the core of",
-    "concurrently", "emerging as", "on the horizon", "finally", "as we advance"
+    "concurrently", "emerging as", "on the horizon", "finally", "as we advance",
+    "in the current epoch of", "catalyzed a tectonic shift", "ushering in an era where",
+    "this emergent ecosystem", "at the core of this transformation", "concurrently,",
+    "from a deployment standpoint", "emerging research in", "in parallel,", 
+    "on the horizon,", "finally, the convergence of", "as we advance into this"
   ],
   
   // From your CSV - Pseudo-Insight Phrases
@@ -107,7 +127,9 @@ const wordLists = {
     "this begs the question", "it's not just about", "the implications are far-reaching",
     "this opens up new possibilities", "what does this mean for the future",
     "we must ask ourselves", "let's take a moment to consider", "the answer may surprise you",
-    "in many ways, this reflects a larger trend", "striking a balance between"
+    "in many ways, this reflects a larger trend", "striking a balance between",
+    "signals a paradigm shift toward", "represents the frontier of", "will define the competitive landscape",
+    "best positioned to harness", "exponential potential of"
   ],
   
   // From your CSV - Platitude Statements
@@ -200,8 +222,8 @@ const analyzeSentenceStarters = (sentences) => {
   const repetitiveScore = repeatedStarters.length / sentences.length;
   
   return {
-    repetitive: repetitiveScore > 0.2,
-    score: repetitiveScore,
+    repetitive: repetitiveScore > 0.15, // Lowered threshold
+    score: Math.min(repetitiveScore * 3, 1), // More aggressive scoring
     details: repeatedStarters.map(([starter, count]) => `"${starter}..." (${count} times)`)
   };
 };
@@ -236,8 +258,8 @@ const analyzeListStructure = (text) => {
   const threeItemRatio = threeItemLists / lists.length;
   
   return {
-    uniform: variance < 0.5 || threeItemRatio > 0.6,
-    score: threeItemRatio > 0.6 ? 0.8 : Math.max(0, 1 - variance),
+    uniform: variance < 0.8 || threeItemRatio > 0.5, // More sensitive
+    score: threeItemRatio > 0.5 ? 0.9 : Math.max(0, 1.2 - variance), // More aggressive
     details: [`${lists.length} lists found`, `${threeItemLists} with exactly 3 items`]
   };
 };
@@ -249,28 +271,66 @@ const analyzeTechnicalClustering = (text, words) => {
   let clusterScore = 0;
   let totalClusters = 0;
   let foundTerms = [];
+  let highDensityCount = 0;
   
   sentences.forEach(sentence => {
     const sentenceTerms = technicalTerms.filter(term => 
       sentence.toLowerCase().includes(term.toLowerCase())
     );
     
-    if (sentenceTerms.length > 2) {
-      clusterScore += sentenceTerms.length * 0.3;
+    if (sentenceTerms.length > 1) { // Lowered from 2 to 1
+      clusterScore += sentenceTerms.length * 0.4; // Increased multiplier
       totalClusters++;
       foundTerms.push(...sentenceTerms);
+    }
+    
+    if (sentenceTerms.length > 3) { // Very high density
+      highDensityCount++;
     }
   });
   
   const density = clusterScore / sentences.length;
   const uniqueTerms = [...new Set(foundTerms)];
+  const overallDensity = uniqueTerms.length / words.length;
+  
+  // Bonus for extremely high technical density
+  let bonusMultiplier = 1;
+  if (overallDensity > 0.05) bonusMultiplier = 1.5; // 5%+ of words are technical terms
+  if (highDensityCount > sentences.length * 0.3) bonusMultiplier = 1.8; // 30%+ sentences have 3+ tech terms
   
   return {
-    clustered: density > 0.1,
-    score: Math.min(density, 1.0),
+    clustered: density > 0.05, // Lowered threshold
+    score: Math.min(density * bonusMultiplier, 1.0),
     details: [`${totalClusters} high-tech clusters`, `${uniqueTerms.length} unique terms`],
-    foundTerms: uniqueTerms.slice(0, 10)
+    foundTerms: uniqueTerms.slice(0, 10),
+    bonusMultiplier
   };
+};
+
+// **KEY ADDITION: Pattern Multiplier for Flagrant Cases**
+const calculatePatternMultiplier = (scores, details, words, sentences) => {
+  let activePatterns = Object.keys(scores).length;
+  let flagrantIndicators = 0;
+  
+  // Count flagrant indicators
+  if (scores.technicalClustering > 0.3) flagrantIndicators++;
+  if (scores.buzzwordClustering > 0.3) flagrantIndicators++;
+  if (scores.lackPersonalVoice > 0.5) flagrantIndicators++;
+  if (scores.perfectGrammar > 0.5) flagrantIndicators++;
+  if (scores.transitionOveruse > 0.3) flagrantIndicators++;
+  if (scores.repetitiveSentenceStarters > 0.3) flagrantIndicators++;
+  
+  // Additional checks for extremely AI-like content
+  if (words.length > 500 && sentences.length > 20) {
+    // Long formal document - apply stricter standards
+    if (activePatterns >= 6 && flagrantIndicators >= 3) {
+      return 1.4; // 40% boost for obvious AI content
+    } else if (activePatterns >= 4 && flagrantIndicators >= 2) {
+      return 1.2; // 20% boost for likely AI content
+    }
+  }
+  
+  return 1.0; // No multiplier for borderline cases
 };
 
 export const analyzeText = (text) => {
@@ -298,8 +358,8 @@ export const analyzeText = (text) => {
     const paragraphVariance = calculateVariance(paragraphSentenceCounts);
     const avgParagraphLength = paragraphSentenceCounts.reduce((sum, count) => sum + count, 0) / paragraphSentenceCounts.length;
     
-    if (paragraphVariance < 1.5 && avgParagraphLength > 2 && paragraphs.length > 3) {
-      scores.uniformParagraphLength = 0.8;
+    if (paragraphVariance < 2.0 && avgParagraphLength > 2 && paragraphs.length > 3) { // Slightly more lenient
+      scores.uniformParagraphLength = Math.min(1.2 - (paragraphVariance / 2), 0.9); // More aggressive
       details.push(`Suspiciously uniform paragraph lengths (variance: ${paragraphVariance.toFixed(2)})`);
     }
   }
@@ -307,7 +367,7 @@ export const analyzeText = (text) => {
   // Sentence starter repetition analysis
   const starterAnalysis = analyzeSentenceStarters(sentences);
   if (starterAnalysis.repetitive) {
-    scores.repetitiveSentenceStarters = Math.min(starterAnalysis.score * 2, 1);
+    scores.repetitiveSentenceStarters = starterAnalysis.score;
     details.push(`Repetitive sentence starters: ${starterAnalysis.details.join(', ')}`);
   }
 
@@ -326,51 +386,54 @@ export const analyzeText = (text) => {
     if (techAnalysis.foundTerms.length > 0) {
       details.push(`Key terms: ${techAnalysis.foundTerms.slice(0, 5).join(', ')}`);
     }
+    if (techAnalysis.bonusMultiplier > 1) {
+      details.push(`Extremely high technical density detected (${techAnalysis.bonusMultiplier}x multiplier)`);
+    }
   }
 
   // Enhanced buzzword analysis
   let buzzwordScore = 0;
   const buzzwordResult = countWords(text, wordLists.buzzwordVerbs);
-  buzzwordScore += buzzwordResult.count * 0.4;
+  buzzwordScore += buzzwordResult.count * 0.5; // Increased weight
   
   const abstractNounResult = countWords(text, wordLists.abstractNouns);
-  buzzwordScore += abstractNounResult.count * 0.3;
+  buzzwordScore += abstractNounResult.count * 0.4; // Increased weight
   
   const adjectiveResult = countWords(text, wordLists.commonAdjectives);
-  buzzwordScore += adjectiveResult.count * 0.2;
+  buzzwordScore += adjectiveResult.count * 0.3; // Increased weight
   
-  if (buzzwordScore > 2) {
+  if (buzzwordScore > 1.5) { // Lowered threshold
     const buzzwordDensity = buzzwordScore / words.length * 1000;
-    scores.buzzwordClustering = Math.min(buzzwordDensity / 8, 1);
+    scores.buzzwordClustering = Math.min(buzzwordDensity / 6, 1); // More aggressive (was /8)
     details.push(`Buzzword clustering detected (score: ${buzzwordScore.toFixed(1)})`);
   }
 
   // Predictable opener analysis
   const openerResult = countPhrases(text, wordLists.predictableOpeners);
   if (openerResult.count > 0) {
-    scores.predictableOpeners = Math.min(openerResult.count * 0.4, 1);
+    scores.predictableOpeners = Math.min(openerResult.count * 0.6, 1); // More aggressive
     details.push(`Predictable openers found: ${openerResult.foundPhrases.slice(0, 2).join(', ')}`);
   }
 
   // Pseudo-insight phrase analysis
   const pseudoInsightResult = countPhrases(text, wordLists.pseudoInsightPhrases);
   if (pseudoInsightResult.count > 0) {
-    scores.pseudoInsightOveruse = Math.min(pseudoInsightResult.count * 0.5, 1);
+    scores.pseudoInsightOveruse = Math.min(pseudoInsightResult.count * 0.7, 1); // More aggressive
     details.push(`Pseudo-insight phrases: ${pseudoInsightResult.foundPhrases.slice(0, 2).join(', ')}`);
   }
 
   // Palpable words analysis
   const palpableResult = countWords(text, wordLists.palpableWords);
-  if (palpableResult.count > 1) {
-    scores.palpableOveruse = Math.min(palpableResult.count * 0.3, 1);
+  if (palpableResult.count > 0) { // Lowered from > 1
+    scores.palpableOveruse = Math.min(palpableResult.count * 0.4, 1); // More aggressive
     details.push(`Overuse of descriptive "palpable-type" words: ${palpableResult.foundWords.slice(0, 3).join(', ')}`);
   }
 
   // Hedging language analysis
   const hedgingResult = countWords(text, wordLists.hedgingLanguage);
   const hedgingDensity = hedgingResult.count / sentences.length;
-  if (hedgingDensity > 0.3) {
-    scores.hedgingLanguage = Math.min(hedgingDensity * 2, 1);
+  if (hedgingDensity > 0.2) { // Lowered threshold
+    scores.hedgingLanguage = Math.min(hedgingDensity * 3, 1); // More aggressive
     details.push(`Excessive hedging language (${(hedgingDensity * 100).toFixed(1)}% of sentences)`);
   }
 
@@ -378,8 +441,8 @@ export const analyzeText = (text) => {
   const transitionResult = countWords(text, wordLists.transitions);
   const transitionDensity = transitionResult.count / sentences.length;
   
-  if (transitionDensity > 0.25) {
-    scores.transitionOveruse = Math.min(transitionDensity * 2.5, 1);
+  if (transitionDensity > 0.2) { // Lowered threshold
+    scores.transitionOveruse = Math.min(transitionDensity * 3, 1); // More aggressive
     details.push(`High transition word density: ${(transitionDensity * 100).toFixed(1)}% of sentences`);
   }
 
@@ -389,37 +452,37 @@ export const analyzeText = (text) => {
     const sentenceVariance = calculateVariance(sentenceLengths);
     const avgSentenceLength = sentenceLengths.reduce((sum, len) => sum + len, 0) / sentenceLengths.length;
     
-    if (sentenceVariance < 25 && avgSentenceLength > 12) {
-      scores.consistentSentenceLength = 0.7;
+    if (sentenceVariance < 30 && avgSentenceLength > 10) { // More lenient but still catches patterns
+      scores.consistentSentenceLength = Math.min(1.5 - (sentenceVariance / 20), 0.8);
       details.push(`Sentences too consistent in length (variance: ${sentenceVariance.toFixed(1)})`);
     }
   }
 
   // Rhetorical questions
   const questionCount = sentences.filter(s => s.trim().includes('?')).length;
-  if (questionCount === 0 && sentences.length > 10) {
-    scores.noRhetoricalQuestions = 0.6;
+  if (questionCount === 0 && sentences.length > 8) { // Lowered threshold
+    scores.noRhetoricalQuestions = 0.7; // Increased penalty
     details.push("No rhetorical questions found in substantial text");
   }
 
   // Contraction analysis
   const contractionCount = (text.match(/\b\w+'\w+\b/g) || []).length;
-  if (contractionCount === 0 && words.length > 200) {
-    scores.perfectGrammar = 0.7;
+  if (contractionCount === 0 && words.length > 150) { // Lowered threshold
+    scores.perfectGrammar = 0.8; // Increased penalty
     details.push("No contractions found - unnaturally formal");
   }
 
   // Personal voice analysis
   const personalResult = countWords(text, personalIndicators);
-  if (personalResult.count === 0 && words.length > 200) {
-    scores.lackPersonalVoice = 0.8;
+  if (personalResult.count === 0 && words.length > 150) { // Lowered threshold
+    scores.lackPersonalVoice = 0.9; // Increased penalty
     details.push("No personal voice indicators detected");
   }
 
   // Platitude detection
   const platitudeResult = countPhrases(text, wordLists.platitudes);
   if (platitudeResult.count > 0) {
-    scores.platitudeOveruse = Math.min(platitudeResult.count * 0.4, 1);
+    scores.platitudeOveruse = Math.min(platitudeResult.count * 0.5, 1); // More aggressive
     details.push(`Platitudes found: ${platitudeResult.foundPhrases.slice(0, 2).join(', ')}`);
   }
 
@@ -435,6 +498,14 @@ export const analyzeText = (text) => {
     
     totalScore += scores[key] * patternWeight;
   });
+
+  // **CRITICAL: Apply pattern multiplier for flagrant cases**
+  const patternMultiplier = calculatePatternMultiplier(scores, details, words, sentences);
+  totalScore *= patternMultiplier;
+  
+  if (patternMultiplier > 1) {
+    details.unshift(`Multiple AI patterns detected - confidence boost applied (${patternMultiplier}x)`);
+  }
 
   totalScore = Math.min(totalScore, 1.0);
 
@@ -463,7 +534,8 @@ export const analyzeText = (text) => {
       buzzwordDensity,
       technicalTermDensity,
       questions: questionCount,
-      listsFound: listAnalysis.details ? listAnalysis.details[0] : '0 lists found'
+      listsFound: listAnalysis.details ? listAnalysis.details[0] : '0 lists found',
+      patternMultiplier: patternMultiplier
     }
   };
 };
