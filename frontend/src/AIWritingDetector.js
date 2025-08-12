@@ -533,6 +533,17 @@ const AIWritingDetector = () => {
           </div>
         )}
       </div>
+            {/* No Refunds Notice */}
+        <div className="mt-12 p-6 bg-gray-100 rounded-lg border border-gray-300">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Refund Policy</h3>
+            <p className="text-sm text-gray-700">
+              Since you receive a <strong>4-day free trial</strong> to fully test our AI detection system, 
+              all subscriptions are final. No refunds will be provided for any reason after purchase. 
+              Please use your trial period to ensure our service meets your needs before subscribing.
+            </p>
+          </div>
+        </div>
     </div>
   );
 };
