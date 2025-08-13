@@ -245,6 +245,29 @@ const AIWritingDetector = () => {
               onChange={handleFileRead}
             />
           </label>
+
+          {selectedFile && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">{selectedFile.name}</p>
+                    <p className="text-xs text-blue-600">
+                      {(selectedFile.size / 1024).toFixed(1)} KB • {selectedFile.type || 'Unknown type'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleClear}
+                  className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                  title="Clear file"
+                >
+                  <FileX className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center mb-6">
@@ -506,14 +529,6 @@ const AIWritingDetector = () => {
                   </li>
                 </ul>
               </div>
-            </div>
-
-            <div className="analysis-card bg-red-50 border-red-200">
-              <h3 className="font-bold text-red-800 mb-3">⚠️ No Refunds Notice</h3>
-              <p className="text-sm text-red-700">
-                Please note that all payments are final. We do not offer refunds for subscription purchases. 
-                Please ensure you understand the service before purchasing.
-              </p>
             </div>
           </div>
         )}
