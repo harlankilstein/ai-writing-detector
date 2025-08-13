@@ -402,8 +402,7 @@ export const analyzeText = (text) => {
       buzzwordDensity,
       personalVoice: personalResult.count > 0,
       contractions: contractionCount,
-      contextType: context,
-      transitionDensity: sentences.length > 0 ? ((transitionResult.count / sentences.length) * 100).toFixed(1) : '0'
+      contextType: context
     }
   };
 };
