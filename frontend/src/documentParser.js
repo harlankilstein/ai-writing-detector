@@ -1,8 +1,4 @@
 // Document parsing utilities for different file types
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Set worker path for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 /**
  * Parse different document types and extract text content
@@ -27,14 +23,14 @@ export const parseDocument = async (file) => {
       return await parseWordDocument(file);
     }
     
-    // Handle PDF files
-    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-      return await parsePDFDocument(file);
-    }
-    
     // Handle RTF files
     if (fileType.includes('rtf') || fileName.endsWith('.rtf')) {
       return await parseRTFDocument(file);
+    }
+    
+    // Handle PDF files - ERROR MESSAGE ONLY
+    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      throw new Error('PDF parsing requires server-side processing. Please convert your PDF to a text file (.txt) or Word document (.docx) for analysis.');
     }
     
     // Fallback: try to read as plain text
@@ -115,51 +111,6 @@ const parseWordDocument = async (file) => {
 };
 
 /**
- * Parse PDF documents using pdf.js
- */
-const parsePDFDocument = async (file) => {
-  try {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = async (event) => {
-        try {
-          const arrayBuffer = event.target.result;
-          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-          const pdf = await loadingTask.promise;
-          
-          let fullText = '';
-          
-          // Extract text from all pages
-          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            const page = await pdf.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n';
-          }
-          
-          if (!fullText || fullText.trim().length === 0) {
-            reject(new Error('No text content found in the PDF document'));
-          }
-          
-          resolve(fullText.trim());
-        } catch (error) {
-          reject(new Error(`Failed to extract text from PDF: ${error.message}`));
-        }
-      };
-      
-      reader.onerror = () => {
-        reject(new Error('Failed to read PDF file'));
-      };
-      
-      reader.readAsArrayBuffer(file);
-    });
-  } catch (error) {
-    throw new Error(`PDF parsing error: ${error.message}`);
-  }
-};
-
-/**
  * Parse RTF documents
  */
 const parseRTFDocument = async (file) => {
@@ -204,12 +155,11 @@ export const validateFile = (file) => {
     'text/plain',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/msword',
-    'application/pdf',
     'application/rtf',
     'text/rtf'
   ];
   
-  const supportedExtensions = ['.txt', '.doc', '.docx', '.pdf', '.rtf'];
+  const supportedExtensions = ['.txt', '.doc', '.docx', '.rtf'];
   
   if (!file) {
     throw new Error('No file provided');
@@ -224,7 +174,7 @@ export const validateFile = (file) => {
   const hasValidType = supportedTypes.includes(file.type);
   
   if (!hasValidExtension && !hasValidType) {
-    throw new Error('Unsupported file type. Please use TXT, DOC, DOCX, PDF, or RTF files.');
+    throw new Error('Unsupported file type. Please use TXT, DOC, DOCX, or RTF files.');
   }
   
   return true;
