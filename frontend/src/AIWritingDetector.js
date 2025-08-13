@@ -236,38 +236,15 @@ const AIWritingDetector = () => {
               <p className="mb-2 text-sm text-gray-500">
                 <span className="font-semibold">Click to upload</span> or drag and drop
               </p>
-              <p className="text-xs text-gray-500">Supports: TXT, DOC, DOCX, PDF, RTF files (Max 10MB)</p>
+              <p className="text-xs text-gray-500">Supports: TXT, DOC, DOCX, RTF files (Max 10MB)</p>
             </div>
             <input
               type="file"
               className="hidden"
-              accept=".txt,.doc,.docx,.pdf,.rtf"
+              accept=".txt,.doc,.docx,.rtf"
               onChange={handleFileRead}
             />
           </label>
-
-          {selectedFile && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2 text-blue-600" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-800">{selectedFile.name}</p>
-                    <p className="text-xs text-blue-600">
-                      {(selectedFile.size / 1024).toFixed(1)} KB • {selectedFile.type || 'Unknown type'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleClear}
-                  className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
-                  title="Clear file"
-                >
-                  <FileX className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex items-center mb-6">
@@ -530,20 +507,17 @@ const AIWritingDetector = () => {
                 </ul>
               </div>
             </div>
+
+            <div className="analysis-card bg-red-50 border-red-200">
+              <h3 className="font-bold text-red-800 mb-3">⚠️ No Refunds Notice</h3>
+              <p className="text-sm text-red-700">
+                Please note that all payments are final. We do not offer refunds for subscription purchases. 
+                Please ensure you understand the service before purchasing.
+              </p>
+            </div>
           </div>
         )}
       </div>
-            {/* No Refunds Notice */}
-        <div className="mt-12 p-6 bg-gray-100 rounded-lg border border-gray-300">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Refund Policy</h3>
-            <p className="text-sm text-gray-700">
-              Since you receive a <strong>4-day free trial</strong> to fully test our AI detection system, 
-              all subscriptions are final. No refunds will be provided for any reason after purchase. 
-              Please use your trial period to ensure our service meets your needs before subscribing.
-            </p>
-          </div>
-        </div>
     </div>
   );
 };
