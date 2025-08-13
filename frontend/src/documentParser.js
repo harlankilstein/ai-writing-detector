@@ -1,4 +1,8 @@
 import mammoth from 'mammoth';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 export const parseDocument = async (file) => {
   const fileType = file.type;
@@ -15,11 +19,14 @@ export const parseDocument = async (file) => {
     else if (fileType === 'application/msword' || fileName.endsWith('.doc')) {
       return await parseDocFile(file);
     }
+    else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      return await parsePdfFile(file);
+    }
     else if (fileName.endsWith('.rtf')) {
       return await parseRtfFile(file);
     }
     else {
-      throw new Error(`Unsupported file type: ${fileType || 'unknown'}. Please use TXT, DOC, DOCX, or RTF files.`);
+      throw new Error(`Unsupported file type: ${fileType || 'unknown'}. Please use TXT, DOC, DOCX, PDF, or RTF files.`);
     }
   } catch (error) {
     console.error('Document parsing error:', error);
@@ -27,133 +34,122 @@ export const parseDocument = async (file) => {
   }
 };
 
-const parseTextFile = (file) => {
+const parseTextFile = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const text = e.target.result;
-        if (!text || text.trim().length === 0) {
-          reject(new Error('The text file appears to be empty.'));
-          return;
-        }
-        resolve(text);
-      } catch (error) {
-        reject(new Error('Failed to read text file.'));
+    reader.onload = (event) => {
+      const text = event.target.result;
+      if (!text || text.trim().length === 0) {
+        reject(new Error('The file appears to be empty'));
+        return;
       }
+      resolve(text);
     };
-    
-    reader.onerror = () => {
-      reject(new Error('Failed to read the file.'));
-    };
-    
+    reader.onerror = () => reject(new Error('Failed to read text file'));
     reader.readAsText(file);
   });
 };
 
 const parseDocxFile = async (file) => {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    
-    if (!result.value || result.value.trim().length === 0) {
-      throw new Error('The Word document appears to be empty or contains no readable text.');
-    }
-    
-    // Log any warnings from mammoth
-    if (result.messages && result.messages.length > 0) {
-      console.warn('Document parsing warnings:', result.messages);
-    }
-    
-    return result.value;
-  } catch (error) {
-    if (error.message.includes('not a valid docx file')) {
-      throw new Error('Invalid DOCX file. Please ensure the file is not corrupted.');
-    }
-    throw new Error(`Failed to parse DOCX file: ${error.message}`);
-  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const arrayBuffer = event.target.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        if (!result.value || result.value.trim().length === 0) {
+          reject(new Error('No text found in the document'));
+          return;
+        }
+        resolve(result.value);
+      } catch (error) {
+        reject(new Error(`Failed to parse DOCX: ${error.message}`));
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read DOCX file'));
+    reader.readAsArrayBuffer(file);
+  });
 };
 
 const parseDocFile = async (file) => {
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    
-    if (!result.value || result.value.trim().length === 0) {
-      throw new Error('The Word document appears to be empty or contains no readable text.');
-    }
-    
-    return result.value;
-  } catch (error) {
-    throw new Error(`Failed to parse DOC file: ${error.message}. Note: Some older DOC formats may not be fully supported.`);
-  }
-};
-
-const parseRtfFile = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
+    reader.onload = async (event) => {
       try {
-        const rtfContent = e.target.result;
+        const arrayBuffer = event.target.result;
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        if (!result.value || result.value.trim().length === 0) {
+          reject(new Error('No text found in the document'));
+          return;
+        }
+        resolve(result.value);
+      } catch (error) {
+        reject(new Error(`Failed to parse DOC: ${error.message}`));
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read DOC file'));
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+const parsePdfFile = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const typedArray = new Uint8Array(event.target.result);
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
         
-        // Basic RTF text extraction (removes RTF control codes)
-        // This is a simplified parser - for production, consider a dedicated RTF library
+        let fullText = '';
+        
+        // Extract text from each page
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map(item => item.str).join(' ');
+          fullText += pageText + '\n';
+        }
+        
+        if (!fullText || fullText.trim().length === 0) {
+          reject(new Error('No text content found in PDF. The PDF might contain only images.'));
+          return;
+        }
+        
+        resolve(fullText.trim());
+      } catch (error) {
+        reject(new Error(`Failed to parse PDF: ${error.message}`));
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read PDF file'));
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+const parseRtfFile = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const rtfContent = event.target.result;
+        
+        // Basic RTF to plain text conversion
         let text = rtfContent
-          .replace(/\\[a-z0-9-]+\s?/gi, '') // Remove RTF control words
-          .replace(/[{}]/g, '') // Remove braces
-          .replace(/\\\\/g, '\\') // Unescape backslashes
-          .replace(/\\'/g, "'") // Unescape quotes
-          .replace(/\s+/g, ' ') // Normalize whitespace
+          .replace(/\\[a-z][a-z0-9]*\s?/g, '')
+          .replace(/[{}]/g, '')
+          .replace(/\s+/g, ' ')
           .trim();
         
         if (!text || text.length === 0) {
-          reject(new Error('The RTF file appears to be empty or contains no readable text.'));
+          reject(new Error('No readable text found in RTF file'));
           return;
         }
         
         resolve(text);
       } catch (error) {
-        reject(new Error('Failed to parse RTF file.'));
+        reject(new Error('Failed to parse RTF file'));
       }
     };
-    
-    reader.onerror = () => {
-      reject(new Error('Failed to read the RTF file.'));
-    };
-    
+    reader.onerror = () => reject(new Error('Failed to read RTF file'));
     reader.readAsText(file);
   });
-};
-
-// Utility function to validate file size
-export const validateFileSize = (file, maxSizeMB = 10) => {
-  const maxSizeBytes = maxSizeMB * 1024 * 1024;
-  if (file.size > maxSizeBytes) {
-    throw new Error(`File size exceeds ${maxSizeMB}MB limit. Please use a smaller file.`);
-  }
-  return true;
-};
-
-// Utility function to validate file type
-export const validateFileType = (file) => {
-  const allowedTypes = [
-    'text/plain',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/msword',
-    'application/rtf'
-  ];
-  
-  const allowedExtensions = ['.txt', '.doc', '.docx', '.rtf'];
-  const fileName = file.name.toLowerCase();
-  
-  const hasValidType = allowedTypes.includes(file.type);
-  const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
-  
-  if (!hasValidType && !hasValidExtension) {
-    throw new Error('Unsupported file type. Please use TXT, DOC, DOCX, or RTF files.');
-  }
-  
-  return true;
 };
