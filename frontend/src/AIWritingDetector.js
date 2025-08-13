@@ -236,12 +236,12 @@ const AIWritingDetector = () => {
               <p className="mb-2 text-sm text-gray-500">
                 <span className="font-semibold">Click to upload</span> or drag and drop
               </p>
-              <p className="text-xs text-gray-500">Supports: TXT, DOC, DOCX, RTF files (Max 10MB)</p>
+              <p className="text-xs text-gray-500">Supports: TXT, DOC, DOCX, PDF, RTF files (Max 10MB)</p>
             </div>
             <input
               type="file"
               className="hidden"
-              accept=".txt,.doc,.docx,.rtf"
+              accept=".txt,.doc,.docx,.pdf,.rtf"
               onChange={handleFileRead}
             />
           </label>
