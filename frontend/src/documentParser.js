@@ -1,10 +1,5 @@
 // Document parsing utilities for different file types
 
-/**
- * Parse different document types and extract text content
- * @param {File} file - The uploaded file
- * @returns {Promise<string>} - Extracted text content
- */
 export const parseDocument = async (file) => {
   const fileType = file.type.toLowerCase();
   const fileName = file.name.toLowerCase();
@@ -28,11 +23,6 @@ export const parseDocument = async (file) => {
       return await parseRTFDocument(file);
     }
     
-    // Handle PDF files - ERROR MESSAGE ONLY
-    if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
-      throw new Error('PDF parsing requires server-side processing. Please convert your PDF to a text file (.txt) or Word document (.docx) for analysis.');
-    }
-    
     // Fallback: try to read as plain text
     return await parseTextFile(file);
     
@@ -41,9 +31,6 @@ export const parseDocument = async (file) => {
   }
 };
 
-/**
- * Parse plain text files
- */
 const parseTextFile = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -68,12 +55,8 @@ const parseTextFile = async (file) => {
   });
 };
 
-/**
- * Parse Microsoft Word documents using mammoth
- */
 const parseWordDocument = async (file) => {
   try {
-    // Dynamic import for mammoth (only load when needed)
     const mammoth = await import('mammoth');
     
     return new Promise((resolve, reject) => {
@@ -88,7 +71,6 @@ const parseWordDocument = async (file) => {
             reject(new Error('No text content found in the Word document'));
           }
           
-          // Log any conversion messages for debugging
           if (result.messages && result.messages.length > 0) {
             console.warn('Word document conversion messages:', result.messages);
           }
@@ -110,9 +92,6 @@ const parseWordDocument = async (file) => {
   }
 };
 
-/**
- * Parse RTF documents
- */
 const parseRTFDocument = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -121,7 +100,6 @@ const parseRTFDocument = async (file) => {
       try {
         const rtfContent = event.target.result;
         
-        // Basic RTF to plain text conversion
         let text = rtfContent
           .replace(/\\[a-z][a-z0-9]*\s?/g, '')
           .replace(/[{}]/g, '')
@@ -146,11 +124,8 @@ const parseRTFDocument = async (file) => {
   });
 };
 
-/**
- * Validate file before processing
- */
 export const validateFile = (file) => {
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  const maxSize = 10 * 1024 * 1024;
   const supportedTypes = [
     'text/plain',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
