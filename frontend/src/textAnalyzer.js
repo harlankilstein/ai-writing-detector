@@ -248,134 +248,6 @@ const calculateConfidenceLevel = (scores, clusters, words, context) => {
   };
 };
 
-// Generate improvement suggestions based on analysis
-const generateImprovementSuggestions = (analysis, detectedScores, metrics) => {
-  const suggestions = [];
-  
-  // Transition word overuse
-  if (detectedScores.transitionOveruse > 0.3) {
-    suggestions.push({
-      priority: 'high',
-      category: 'Language Flow',
-      issue: 'Excessive transition words',
-      suggestion: 'Reduce formal transition words like "furthermore," "moreover," and "additionally." Use shorter, more natural connections between sentences.',
-      impact: 'High'
-    });
-  }
-  
-  // Lack of personal voice
-  if (detectedScores.lackPersonalVoice > 0.4) {
-    suggestions.push({
-      priority: 'high',
-      category: 'Personal Voice',
-      issue: 'No personal perspective detected',
-      suggestion: 'Add personal experiences, opinions, or first-person statements like "I think," "in my experience," or "I\'ve noticed."',
-      impact: 'High'
-    });
-  }
-  
-  // Perfect grammar (no contractions)
-  if (detectedScores.perfectGrammar > 0.3 && metrics.contractions === 0) {
-    suggestions.push({
-      priority: 'medium',
-      category: 'Writing Style',
-      issue: 'Overly formal - no contractions',
-      suggestion: 'Use contractions like "it\'s," "don\'t," "can\'t," and "we\'re" to make the writing more natural and conversational.',
-      impact: 'Medium'
-    });
-  }
-  
-  // Buzzword clustering
-  if (detectedScores.buzzwordClustering > 0.4) {
-    suggestions.push({
-      priority: 'high',
-      category: 'Word Choice',
-      issue: 'AI-style buzzwords detected',
-      suggestion: 'Replace buzzwords like "delve," "leverage," "comprehensive," and "nuanced" with simpler, more direct language.',
-      impact: 'High'
-    });
-  }
-  
-  // Technical jargon clustering
-  if (detectedScores.technicalClustering > 0.5) {
-    suggestions.push({
-      priority: 'medium',
-      category: 'Technical Language',
-      issue: 'Heavy technical jargon concentration',
-      suggestion: 'Spread out technical terms or replace some with simpler explanations. Mix technical content with everyday examples.',
-      impact: 'Medium'
-    });
-  }
-  
-  // Consistent sentence length
-  if (detectedScores.consistentSentenceLength > 0.4) {
-    suggestions.push({
-      priority: 'medium',
-      category: 'Sentence Structure',
-      issue: 'Sentences are too similar in length',
-      suggestion: 'Vary your sentence lengths. Mix short, punchy sentences with longer, more complex ones. Aim for a natural rhythm.',
-      impact: 'Medium'
-    });
-  }
-  
-  // High average sentence length
-  if (parseFloat(metrics.avgSentenceLength) > 25) {
-    suggestions.push({
-      priority: 'medium',
-      category: 'Readability',
-      issue: 'Sentences are too long on average',
-      suggestion: 'Break up long sentences. Aim for an average of 15-20 words per sentence for better readability.',
-      impact: 'Medium'
-    });
-  }
-  
-  // Low transition density (good score) - positive feedback
-  if (analysis.score < 0.3) {
-    suggestions.push({
-      priority: 'low',
-      category: 'Positive Feedback',
-      issue: 'Writing appears human-like',
-      suggestion: 'Good job! Your writing has natural variation and personal voice. To maintain this, keep using personal experiences and varied sentence structures.',
-      impact: 'Maintenance'
-    });
-  }
-  
-  // Context-specific suggestions
-  if (metrics.contextType === 'academic' && detectedScores.lackPersonalVoice > 0.3) {
-    suggestions.push({
-      priority: 'low',
-      category: 'Academic Writing',
-      issue: 'Academic tone may be too impersonal',
-      suggestion: 'While maintaining academic standards, consider adding phrases like "this research suggests" or "the findings indicate" to show engagement.',
-      impact: 'Low'
-    });
-  }
-  
-  // General suggestions based on overall score
-  if (analysis.score > 0.7) {
-    suggestions.push({
-      priority: 'high',
-      category: 'Overall Strategy',
-      issue: 'High AI detection score',
-      suggestion: 'Focus on adding personal anecdotes, using more contractions, varying sentence lengths, and replacing formal buzzwords with simpler language.',
-      impact: 'High'
-    });
-  } else if (analysis.score > 0.4) {
-    suggestions.push({
-      priority: 'medium',
-      category: 'Overall Strategy',
-      issue: 'Moderate AI detection patterns',
-      suggestion: 'Your writing shows some AI patterns. Focus on the highest-impact changes: add personal voice and reduce formal transition words.',
-      impact: 'Medium'
-    });
-  }
-  
-  return suggestions.sort((a, b) => {
-    const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-    return priorityOrder[b.priority] - priorityOrder[a.priority];
-  });
-};
-
 export const analyzeText = (text) => {
   // Input validation and sanitization
   if (!text || typeof text !== 'string') {
@@ -383,8 +255,7 @@ export const analyzeText = (text) => {
       score: 0,
       confidence: { level: 'Insufficient', certainty: 'No text provided' },
       details: ['No text provided for analysis'],
-      metrics: { words: 0, sentences: 0, paragraphs: 0 },
-      suggestions: []
+      metrics: { words: 0, sentences: 0, paragraphs: 0 }
     };
   }
 
@@ -397,8 +268,7 @@ export const analyzeText = (text) => {
       score: 0,
       confidence: { level: 'Insufficient', certainty: 'Text too short for analysis' },
       details: ['Text too short for reliable analysis (minimum 50 words required)'],
-      metrics: { words: words.length, sentences: sentences.length, paragraphs: paragraphs.length },
-      suggestions: []
+      metrics: { words: words.length, sentences: sentences.length, paragraphs: paragraphs.length }
     };
   }
 
@@ -517,37 +387,23 @@ export const analyzeText = (text) => {
     safeDivision(words.length, sentences.length).toFixed(1) : '0';
   const buzzwordDensity = words.length > 0 ? 
     safeDivision((buzzwordResult.count + abstractNounResult.count), words.length * 1000).toFixed(2) : '0';
-  
-  // Calculate transition density for metrics
-  const transitionDensity = sentences.length > 0 ? 
-    ((transitionResult.count / sentences.length) * 100).toFixed(1) : '0';
 
-  const metrics = {
-    words: words.length,
-    sentences: sentences.length,
-    paragraphs: paragraphs.length,
-    avgParagraphLength,
-    avgSentenceLength,
-    buzzwordDensity,
-    personalVoice: personalResult.count > 0,
-    contractions: contractionCount,
-    contextType: context,
-    transitionDensity
-  };
-
-  // Generate improvement suggestions
-  const analysisResult = {
+  return {
     score: totalScore,
     confidence,
     details: details.length > 0 ? details : ['No significant AI patterns detected'],
     context,
-    metrics
-  };
-  
-  const suggestions = generateImprovementSuggestions(analysisResult, scores, metrics);
-
-  return {
-    ...analysisResult,
-    suggestions
+    metrics: {
+      words: words.length,
+      sentences: sentences.length,
+      paragraphs: paragraphs.length,
+      avgParagraphLength,
+      avgSentenceLength,
+      buzzwordDensity,
+      personalVoice: personalResult.count > 0,
+      contractions: contractionCount,
+      contextType: context,
+      transitionDensity: sentences.length > 0 ? ((transitionResult.count / sentences.length) * 100).toFixed(1) : '0'
+    }
   };
 };
