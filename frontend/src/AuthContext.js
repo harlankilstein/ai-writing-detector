@@ -118,7 +118,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isTrialExpired = () => {
-    if (!user || user.subscription_status !== 'trial') return false;
+    // Family members get unlimited access
+    const familyMembers = [
+      "drkilstein@gmail.com",
+      "shmuelkilstein@gmail.com", 
+      "joeysosin@gmail.com",
+      "jacobsosin@gmail.com"
+    ];
+    
+    if (!user) return true;
+    
+    // If user is a family member, never expired
+    if (familyMembers.includes(user.email)) {
+      return false;
+    }
+    
+    if (user.subscription_status !== 'trial') {
+      return false;
+    }
     
     const now = new Date();
     const trialExpires = new Date(user.trial_expires);
