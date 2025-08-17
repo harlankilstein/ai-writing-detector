@@ -50,14 +50,14 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [BACKEND_URL]);
 
-  const signup = async (email, password) => {
+  const signup = async (email, password, name) => {
     try {
       const response = await fetch(`${BACKEND_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name }),
       });
 
       if (!response.ok) {
@@ -118,24 +118,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isTrialExpired = () => {
-    // Family members get unlimited access
-    const familyMembers = [
-      "drkilstein@gmail.com",
-      "shmuelkilstein@gmail.com", 
-      "joeysosin@gmail.com",
-      "jacobsosin@gmail.com"
-    ];
-    
-    if (!user) return true;
-    
-    // If user is a family member, never expired
-    if (familyMembers.includes(user.email)) {
-      return false;
-    }
-    
-    if (user.subscription_status !== 'trial') {
-      return false;
-    }
+    if (!user || user.subscription_status !== 'trial') return false;
     
     const now = new Date();
     const trialExpires = new Date(user.trial_expires);
@@ -151,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     getTrialDaysLeft,
     isTrialExpired,
-    isAuthenticated: !!token,
+    isAuthenticated: !!user,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
