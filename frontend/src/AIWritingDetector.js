@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, AlertCircle, CheckCircle, BarChart3, FileX, Globe, LogOut } from 'lucide-react';
 import { analyzeText } from './textAnalyzer';
-import { parseDocument } from './documentParser';
+import { parseDocument, validateFile } from './documentParser';
 import { useAuth } from './AuthContext';
 import AuthModal from './AuthModal';
 import TrialStatus from './TrialStatus';
@@ -75,6 +75,9 @@ const AIWritingDetector = () => {
     setAnalysisSource('file');
     
     try {
+      // Validate file before parsing
+      validateFile(file);
+      
       const text = await parseDocument(file);
       
       if (!text || text.trim().length < 50) {
@@ -182,6 +185,9 @@ const AIWritingDetector = () => {
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Upload a document to analyze writing patterns, structure, and characteristics that may indicate AI generation.
               This tool focuses on patterns rather than individual word flags.
+            </p>
+            <p className="text-sm text-blue-600 font-medium mt-2">
+              The analysis is very quick. Scroll down for results.
             </p>
           </div>
 
@@ -506,6 +512,14 @@ const AIWritingDetector = () => {
                   </li>
                 </ul>
               </div>
+            </div>
+
+            <div className="analysis-card bg-red-50 border-red-200">
+              <h3 className="font-bold text-red-800 mb-3">⚠️ No Refunds Notice</h3>
+              <p className="text-sm text-red-700">
+                Please note that all payments are final. We do not offer refunds for subscription purchases. 
+                Please ensure you understand the service before purchasing.
+              </p>
             </div>
           </div>
         )}
