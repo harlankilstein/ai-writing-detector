@@ -2,28 +2,18 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
-const AuthModal = ({ isOpen, onClose, mode }) => {
+const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
+  const [mode, setMode] = useState(initialMode); // 'signup', 'login', or 'forgot-password'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [localMode, setLocalMode] = useState(mode);
   
   const { signup, login } = useAuth();
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
-  // Sync local mode with prop when modal opens
-  React.useEffect(() => {
-    if (isOpen) {
-      setLocalMode(mode);
-      setError('');
-      setSuccess('');
-      setEmail('');
-      setPassword('');
-    }
-  }, [isOpen, mode]);
 
   if (!isOpen) return null;
 
@@ -34,13 +24,13 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
     setSuccess('');
 
     try {
-      if (localMode === 'signup') {
-        await signup(email, password);
+      if (mode === 'signup') {
+        await signup(email, password, name);
         onClose();
-      } else if (localMode === 'login') {
+      } else if (mode === 'login') {
         await login(email, password);
         onClose();
-      } else if (localMode === 'forgot-password') {
+      } else if (mode === 'forgot-password') {
         await handleForgotPassword();
       }
     } catch (err) {
@@ -74,11 +64,12 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
   };
 
   const switchMode = () => {
-    if (localMode === 'signup') setLocalMode('login');
-    else if (localMode === 'login') setLocalMode('signup');
-    else if (localMode === 'forgot-password') setLocalMode('login');
+    if (mode === 'signup') setMode('login');
+    else if (mode === 'login') setMode('signup');
+    else if (mode === 'forgot-password') setMode('login');
     setError('');
     setSuccess('');
+    setName(''); // Clear name when switching modes
   };
 
   return (
@@ -87,8 +78,8 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-900">
-            {localMode === 'signup' ? 'Start Your Free Trial' : 
-             localMode === 'login' ? 'Welcome Back' : 'Reset Your Password'}
+            {mode === 'signup' ? 'Start Your Free Trial' : 
+             mode === 'login' ? 'Welcome Back' : 'Reset Your Password'}
           </h2>
           <button
             onClick={onClose}
@@ -100,7 +91,7 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
 
         {/* Content */}
         <div className="p-6">
-          {localMode === 'signup' && (
+          {mode === 'signup' && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-start">
                 <CheckCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
@@ -117,7 +108,7 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
             </div>
           )}
 
-          {localMode === 'forgot-password' && (
+          {mode === 'forgot-password' && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-sm text-gray-600">
                 Enter your email address and we'll send you a link to reset your password.
@@ -160,8 +151,28 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
               </div>
             </div>
 
+            {/* Name field for signup */}
+            {mode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Password */}
-            {localMode !== 'forgot-password' && (
+            {mode !== 'forgot-password' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
@@ -173,7 +184,7 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder={localMode === 'signup' ? 'Create a password (6+ characters)' : 'Enter your password'}
+                    placeholder={mode === 'signup' ? 'Create a password (6+ characters)' : 'Enter your password'}
                     minLength={6}
                     required
                   />
@@ -184,29 +195,29 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !email || (localMode !== 'forgot-password' && !password)}
+              disabled={loading || !email || (mode !== 'forgot-password' && !password) || (mode === 'signup' && !name)}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  {localMode === 'signup' ? 'Creating Account...' : 
-                   localMode === 'login' ? 'Signing In...' : 'Sending Reset Link...'}
+                  {mode === 'signup' ? 'Creating Account...' : 
+                   mode === 'login' ? 'Signing In...' : 'Sending Reset Link...'}
                 </div>
               ) : (
-                localMode === 'signup' ? 'Start Free Trial' : 
-                localMode === 'login' ? 'Sign In' : 'Send Reset Link'
+                mode === 'signup' ? 'Start Free Trial' : 
+                mode === 'login' ? 'Sign In' : 'Send Reset Link'
               )}
             </button>
           </form>
 
           {/* Switch Mode */}
           <div className="mt-6 text-center">
-            {localMode === 'forgot-password' ? (
+            {mode === 'forgot-password' ? (
               <p className="text-sm text-gray-600">
                 Remember your password?
                 <button
-                  onClick={() => setLocalMode('login')}
+                  onClick={() => setMode('login')}
                   className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Sign In
@@ -214,10 +225,10 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
               </p>
             ) : (
               <>
-                {localMode === 'login' && (
+                {mode === 'login' && (
                   <p className="text-sm text-gray-600 mb-3">
                     <button
-                      onClick={() => setLocalMode('forgot-password')}
+                      onClick={() => setMode('forgot-password')}
                       className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                       Forgot your password?
@@ -225,12 +236,12 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
                   </p>
                 )}
                 <p className="text-sm text-gray-600">
-                  {localMode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
+                  {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
                   <button
                     onClick={switchMode}
                     className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    {localMode === 'signup' ? 'Sign In' : 'Start Free Trial'}
+                    {mode === 'signup' ? 'Sign In' : 'Start Free Trial'}
                   </button>
                 </p>
               </>
