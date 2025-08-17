@@ -53,6 +53,28 @@ const AIWritingDetector = () => {
     };
   };
 
+  const validateFileHelper = (file) => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const supportedExtensions = ['.txt', '.doc', '.docx', '.rtf'];
+    
+    if (!file) {
+      throw new Error('No file provided');
+    }
+    
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 10MB limit');
+    }
+    
+    const fileName = file.name.toLowerCase();
+    const hasValidExtension = supportedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!hasValidExtension) {
+      throw new Error('Unsupported file type. Please use TXT, DOC, DOCX, or RTF files.');
+    }
+    
+    return true;
+  };
+
   const handleFileRead = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -76,7 +98,7 @@ const AIWritingDetector = () => {
     
     try {
       // Validate file before parsing
-      validateFile(file);
+      validateFileHelper(file);
       
       const text = await parseDocument(file);
       
