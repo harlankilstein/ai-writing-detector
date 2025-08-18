@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
 const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
-  const [mode, setMode] = useState(initialMode); // 'signup', 'login', or 'forgot-password'
+  const [currentMode, setCurrentMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -12,8 +12,21 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
   const [success, setSuccess] = useState('');
   
   const { signup, login } = useAuth();
-
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+  // Update mode when prop changes
+  useEffect(() => {
+    setCurrentMode(initialMode);
+  }, [initialMode]);
+
+  // Clear form when mode changes
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setName('');
+    setError('');
+    setSuccess('');
+  }, [currentMode]);
 
   if (!isOpen) return null;
 
@@ -24,13 +37,13 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
     setSuccess('');
 
     try {
-      if (mode === 'signup') {
+      if (currentMode === 'signup') {
         await signup(email, password, name);
         onClose();
-      } else if (mode === 'login') {
+      } else if (currentMode === 'login') {
         await login(email, password);
         onClose();
-      } else if (mode === 'forgot-password') {
+      } else if (currentMode === 'forgot-password') {
         await handleForgotPassword();
       }
     } catch (err) {
@@ -57,20 +70,15 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
 
       const data = await response.json();
       setSuccess(data.message);
-      setEmail(''); // Clear email field after success
+      setEmail('');
     } catch (error) {
       throw error;
     }
   };
 
-  const switchMode = () => {
-    if (mode === 'signup') setMode('login');
-    else if (mode === 'login') setMode('signup');
-    else if (mode === 'forgot-password') setMode('login');
-    setError('');
-    setSuccess('');
-    setName(''); // Clear name when switching modes
-  };
+  const switchToLogin = () => setCurrentMode('login');
+  const switchToSignup = () => setCurrentMode('signup');
+  const switchToForgotPassword = () => setCurrentMode('forgot-password');
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -78,8 +86,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-900">
-            {mode === 'signup' ? 'Start Your Free Trial' : 
-             mode === 'login' ? 'Welcome Back' : 'Reset Your Password'}
+            {currentMode === 'signup' ? 'Start Your Free Trial' : 
+             currentMode === 'login' ? 'Welcome Back' : 'Reset Your Password'}
           </h2>
           <button
             onClick={onClose}
@@ -91,7 +99,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
 
         {/* Content */}
         <div className="p-6">
-          {mode === 'signup' && (
+          {/* Trial Benefits - ONLY for SIGNUP */}
+          {currentMode === 'signup' && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-start">
                 <CheckCircle className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
@@ -108,7 +117,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
             </div>
           )}
 
-          {mode === 'forgot-password' && (
+          {/* Forgot Password Info - ONLY for FORGOT PASSWORD */}
+          {currentMode === 'forgot-password' && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <p className="text-sm text-gray-600">
                 Enter your email address and we'll send you a link to reset your password.
@@ -133,7 +143,7 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+            {/* Email Field - ALWAYS SHOWN */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
@@ -151,8 +161,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
               </div>
             </div>
 
-            {/* Full Name field - ONLY shows during SIGNUP mode */}
-            {mode === 'signup' ? (
+            {/* Name Field - ONLY FOR SIGNUP */}
+            {currentMode === 'signup' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
@@ -169,10 +179,10 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
                   />
                 </div>
               </div>
-            ) : null}
+            )}
 
-            {/* Password - shows for LOGIN and SIGNUP only */}
-            {mode === 'login' || mode === 'signup' ? (
+            {/* Password Field - FOR LOGIN AND SIGNUP ONLY (NOT forgot password) */}
+            {(currentMode === 'login' || currentMode === 'signup') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
@@ -184,40 +194,46 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder={mode === 'signup' ? 'Create a password (6+ characters)' : 'Enter your password'}
+                    placeholder={currentMode === 'signup' ? 'Create a password (6+ characters)' : 'Enter your password'}
                     minLength={6}
                     required
                   />
                 </div>
               </div>
-            ) : null}
+            )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !email || (mode === 'login' && !password) || (mode === 'signup' && (!password || !name))}
+              disabled={
+                loading || 
+                !email || 
+                (currentMode === 'login' && !password) || 
+                (currentMode === 'signup' && (!password || !name))
+              }
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  {mode === 'signup' ? 'Creating Account...' : 
-                   mode === 'login' ? 'Signing In...' : 'Sending Reset Link...'}
+                  {currentMode === 'signup' ? 'Creating Account...' : 
+                   currentMode === 'login' ? 'Signing In...' : 'Sending Reset Link...'}
                 </div>
               ) : (
-                mode === 'signup' ? 'Start Free Trial' : 
-                mode === 'login' ? 'Sign In' : 'Send Reset Link'
+                currentMode === 'signup' ? 'Start Free Trial' : 
+                currentMode === 'login' ? 'Sign In' : 'Send Reset Link'
               )}
             </button>
           </form>
 
-          {/* Switch Mode */}
+          {/* Switch Mode Links */}
           <div className="mt-6 text-center">
-            {mode === 'forgot-password' ? (
+            {currentMode === 'forgot-password' ? (
               <p className="text-sm text-gray-600">
                 Remember your password?
                 <button
-                  onClick={() => setMode('login')}
+                  type="button"
+                  onClick={switchToLogin}
                   className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Sign In
@@ -225,10 +241,11 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
               </p>
             ) : (
               <>
-                {mode === 'login' && (
+                {currentMode === 'login' && (
                   <p className="text-sm text-gray-600 mb-3">
                     <button
-                      onClick={() => setMode('forgot-password')}
+                      type="button"
+                      onClick={switchToForgotPassword}
                       className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                       Forgot your password?
@@ -236,12 +253,13 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
                   </p>
                 )}
                 <p className="text-sm text-gray-600">
-                  {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
+                  {currentMode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
                   <button
-                    onClick={switchMode}
+                    type="button"
+                    onClick={currentMode === 'signup' ? switchToLogin : switchToSignup}
                     className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    {mode === 'signup' ? 'Sign In' : 'Start Free Trial'}
+                    {currentMode === 'signup' ? 'Sign In' : 'Start Free Trial'}
                   </button>
                 </p>
               </>
