@@ -151,8 +151,8 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
               </div>
             </div>
 
-            {/* Name field - ONLY for signup */}
-            {mode === 'signup' && (
+            {/* Full Name field - ONLY shows during SIGNUP mode */}
+            {mode === 'signup' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
@@ -169,10 +169,10 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
                   />
                 </div>
               </div>
-            )}
+            ) : null}
 
-            {/* Password - NOT for forgot-password */}
-            {mode !== 'forgot-password' && (
+            {/* Password - shows for LOGIN and SIGNUP only */}
+            {mode === 'login' || mode === 'signup' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password
@@ -190,12 +190,12 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
                   />
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !email || (mode !== 'forgot-password' && !password) || (mode === 'signup' && !name)}
+              disabled={loading || !email || (mode === 'login' && !password) || (mode === 'signup' && (!password || !name))}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
