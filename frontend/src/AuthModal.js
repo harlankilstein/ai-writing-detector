@@ -151,7 +151,7 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
               </div>
             </div>
 
-            {/* Name field for signup */}
+            {/* Name field - ONLY for signup */}
             {mode === 'signup' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -171,7 +171,7 @@ const AuthModal = ({ isOpen, onClose, mode: initialMode = 'signup' }) => {
               </div>
             )}
 
-            {/* Password */}
+            {/* Password - NOT for forgot-password */}
             {mode !== 'forgot-password' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
